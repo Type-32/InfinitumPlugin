@@ -11,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class TeleportPlugin extends JavaPlugin {
+public class InfMinecraftHelloPlugin extends JavaPlugin {
 
     private HashMap<UUID, UUID> tpaRequests = new HashMap<>();
 
