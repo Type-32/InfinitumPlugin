@@ -1,0 +1,4 @@
+name: infMinecraftHelloPlugin
+version: '${project.version}'
+main: cn.crtlprototypestudios.infminecrafthelloplugin.InfMinecraftHelloPlugin
+api-version: 1.20
