@@ -6,7 +6,7 @@
 
     <groupId>cn.crtlprototypestudios</groupId>
     <artifactId>infMinecraftHelloPlugin</artifactId>
-    <version>0.1.0-preview3</version>
+    <version>0.1.0-preview7</version>
     <packaging>jar</packaging>
 
     <name>infMinecraftHelloPlugin</name>

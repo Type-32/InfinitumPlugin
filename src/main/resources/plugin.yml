@@ -2,3 +2,44 @@ name: infMinecraftHelloPlugin
 version: '${project.version}'
 main: cn.crtlprototypestudios.infminecrafthelloplugin.InfMinecraftHelloPlugin
 api-version: 1.20
+
+commands:
+  tpa:
+    description: Request to teleport to another player
+    usage: /tpa <Player Username>
+  tpaccept:
+    description: Accept a teleport request
+    usage: /tpaccept <Player Username>
+  spawn:
+    description: Teleport to the world spawn point
+    usage: /spawn
+  back:
+    description: Return to your previous location before last teleport
+    usage: /back
+  sethome:
+    description: Set a home
+    usage: /sethome <Home Name>
+  delhome:
+    description: Delete a home
+    usage: /delhome <Home Name>
+  home:
+    description: Teleport to a home
+    usage: /home <Home Name>
+  homesettings:
+    description: Change home limit per player
+    usage: /homesettings <Max Home Amount Limit>
+    permission: teleport.homesettings
+
+permissions:
+  teleport.home:
+    default: true
+  teleport.spawn:
+    default: true
+  teleport.back:
+    default: true
+  teleport.sethome:
+    default: true
+  teleport.delhome:
+    default: true
+  teleport.homesettings:
+    default: op

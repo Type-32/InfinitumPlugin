@@ -6,6 +6,8 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -14,10 +16,23 @@ import java.util.UUID;
 public class InfMinecraftHelloPlugin extends JavaPlugin {
 
     private HashMap<UUID, UUID> tpaRequests = new HashMap<>();
+    private HashMap<String, Location> playerHomes = new HashMap<>();
+    private int maxHomesPerPlayer = 5;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+
+        Player player = event.getEntity();
+
+        // Store death location
+        Location deathLoc = player.getLocation();
+        DeathManager.setDeathLocation(player, deathLoc);
+
     }
 
     @Override
@@ -55,14 +70,14 @@ public class InfMinecraftHelloPlugin extends JavaPlugin {
             return true;
 
         } else if(command.getName().equalsIgnoreCase("tpaccept")) {
-            if(!tpaRequests.containsKey(player.getUniqueId())) {
+            if (!tpaRequests.containsKey(player.getUniqueId())) {
                 player.sendMessage(ChatColor.RED + "You have no pending requests!");
                 return true;
             }
 
             Player requester = Bukkit.getPlayer(tpaRequests.get(player.getUniqueId()));
 
-            if(requester == null) {
+            if (requester == null) {
                 player.sendMessage(ChatColor.RED + "That player is no longer online!");
                 tpaRequests.remove(player.getUniqueId());
                 return true;
@@ -71,57 +86,103 @@ public class InfMinecraftHelloPlugin extends JavaPlugin {
             requester.teleport(player);
             tpaRequests.remove(player.getUniqueId());
 
-            player.sendMessage(ChatColor.AQUA + "Accepted teleport request from " + requester.getName());
-            requester.sendMessage(ChatColor.AQUA + player.getName() + " accepted your teleport request!");
+            player.sendMessage((ChatColor.AQUA + "Accepted teleport request from ") + (ChatColor.GOLD + requester.getName()));
+            requester.sendMessage((ChatColor.GOLD + player.getName()) + (ChatColor.AQUA + " accepted your teleport request!"));
 
             return true;
 
+        }else if(command.getName().equalsIgnoreCase("sethome")) {
+            Player p = (Player) sender;
+            if(args.length != 1) {
+                p.sendMessage(ChatColor.GRAY + "/sethome <name>");
+                return true;
+            }
+
+            String name = args[0];
+            Location loc = p.getLocation();
+
+            // Limit number of homes
+            if(playerHomes.size() >= maxHomesPerPlayer) {
+                p.sendMessage(ChatColor.RED + "You have reached the maximum amount of homes you can create.");
+                return true;
+            }
+
+            playerHomes.put(name, loc);
+            p.sendMessage((ChatColor.AQUA + "Created home ") + (ChatColor.GOLD + name));
+
+            // /delhome
+        } else if(command.getName().equalsIgnoreCase("delhome")) {
+            Player p = (Player) sender;
+            if(args.length != 1) {
+                p.sendMessage(ChatColor.GRAY + "/delhome <name>");
+                return true;
+            }
+
+            String name = args[0];
+            playerHomes.remove(name);
+            p.sendMessage((ChatColor.AQUA + "Deleted home ") + (ChatColor.GOLD + name));
+
+            // /home
         } else if(command.getName().equalsIgnoreCase("home")) {
-            if(!player.hasPermission("teleport.home")) {
-                player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+            Player p = (Player) sender;
+
+            if(args.length > 1) {
+                p.sendMessage(ChatColor.GRAY + "/home <home_name>");
                 return true;
             }
 
-            Location home = HomeManager.getHome(player); // Custom home manager class
-
-            if(home == null) {
-                player.sendMessage(ChatColor.RED + "You have not set a home!");
-                return true;
+            Location loc;
+            if(args.length == 0) {
+                // Go to default home
+                loc = playerHomes.get("home");
+            } else {
+                // Go to named home
+                String name = args[0];
+                loc = playerHomes.get(name);
             }
 
-            player.teleport(home);
-            player.sendMessage(ChatColor.AQUA + "Teleported to your home!");
-            return true;
-
-        } else if(command.getName().equalsIgnoreCase("spawn")) {
-            if(!player.hasPermission("teleport.spawn")) {
-                player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
-                return true;
+            if(loc != null) {
+                p.teleport(loc);
+                p.sendMessage((ChatColor.GOLD + "Teleported you to home ") + (ChatColor.AQUA + args[0]) + (ChatColor.GOLD + "!"));
+            } else {
+                p.sendMessage((ChatColor.RED + "There is no home with the name ") + (ChatColor.GOLD + args[0]) + (ChatColor.RED + "."));
             }
 
-            player.teleport(player.getWorld().getSpawnLocation());
-            player.sendMessage(ChatColor.AQUA + "Teleported to the world spawn!");
-            return true;
-
+            // /back - changed to use last death location
         } else if(command.getName().equalsIgnoreCase("back")) {
-            if(!player.hasPermission("teleport.back")) {
-                player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+            Player p = (Player) sender;
+            Location deathLoc = DeathManager.getDeathLocation(p); // Custom manager
+
+            if(deathLoc != null) {
+                p.teleport(deathLoc);
+                p.sendMessage(ChatColor.AQUA + "Teleported to your death location.");
+                DeathManager.clearDeathLocation(p);
+            } else {
+                p.sendMessage(ChatColor.RED + "There are no previous death positions to teleport.");
+            }
+
+            // /homesettings - ops only
+        } else if(command.getName().equalsIgnoreCase("homesettings")) {
+            if(!(sender instanceof Player)) return true;
+
+            Player p = (Player) sender;
+            if(!p.isOp()) {
+                p.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
                 return true;
             }
 
-            Location back = BackManager.getBackLocation(player); // Custom back manager class
-
-            if(back == null) {
-                player.sendMessage(ChatColor.RED + "You have no previous location to return to!");
+            if(args.length != 1) {
+                p.sendMessage(ChatColor.GRAY + "/homesettings <Max Amount of Homes>");
                 return true;
             }
 
-            player.teleport(back);
-            player.sendMessage(ChatColor.AQUA + "Returned to your previous location!");
-            return true;
+            // Set new maximium homes per player
+            int max = Integer.parseInt(args[0]);
+            maxHomesPerPlayer = max;
+
+            p.sendMessage((ChatColor.AQUA + "Home limit is now ") + (ChatColor.GOLD + String.format("%s", max)));
+
         }
-
         return false;
     }
-
 }
