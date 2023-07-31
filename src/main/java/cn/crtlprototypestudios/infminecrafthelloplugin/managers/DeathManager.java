@@ -1,4 +1,4 @@
-package cn.crtlprototypestudios.infminecrafthelloplugin;
+package cn.crtlprototypestudios.infminecrafthelloplugin.managers;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -15,7 +15,7 @@ public class DeathManager {
     }
 
     public static Location getDeathLocation(Player player) {
-        return deathLocations.get(player.getUniqueId());
+        return deathLocations.get(player.getUniqueId()) == null ? null : deathLocations.get(player.getUniqueId());
     }
 
     public static void clearDeathLocation(Player player) {

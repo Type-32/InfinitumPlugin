@@ -10,36 +10,25 @@ commands:
   tpaccept:
     description: Accept a teleport request
     usage: /tpaccept <Player Username>
+  tpdeny:
+    description: Deny a teleport request
+    usage: /tpdeny <Player Username>
   spawn:
     description: Teleport to the world spawn point
     usage: /spawn
   back:
     description: Return to your previous location before last teleport
     usage: /back
-  sethome:
-    description: Set a home
-    usage: /sethome <Home Name>
-  delhome:
-    description: Delete a home
-    usage: /delhome <Home Name>
-  home:
-    description: Teleport to a home
-    usage: /home <Home Name>
-  homesettings:
-    description: Change home limit per player
-    usage: /homesettings <Max Home Amount Limit>
-    permission: teleport.homesettings
+  waypoint:
+    description: Waypoint System
+    usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>
 
 permissions:
-  teleport.home:
+  teleport.tpa:
     default: true
   teleport.spawn:
     default: true
   teleport.back:
     default: true
-  teleport.sethome:
+  teleport.waypoint:
     default: true
-  teleport.delhome:
-    default: true
-  teleport.homesettings:
-    default: op
