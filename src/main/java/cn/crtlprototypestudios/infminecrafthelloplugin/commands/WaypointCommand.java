@@ -1,10 +1,8 @@
 package cn.crtlprototypestudios.infminecrafthelloplugin.commands;
 
-import cn.crtlprototypestudios.infminecrafthelloplugin.InfMinecraftHelloPlugin;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import cn.crtlprototypestudios.infminecrafthelloplugin.classes.Waypoint;
+import cn.crtlprototypestudios.infminecrafthelloplugin.managers.WaypointManager;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,15 +10,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class WaypointCommand implements CommandExecutor, TabCompleter {
-    private HashMap<String, Location> playerWaypoints = new HashMap<>();
-    private HashMap<String, String> playerWPDimensions = new HashMap<>();
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
@@ -43,59 +37,66 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
                 return true;
             }else{
-                if(playerWaypoints.isEmpty()){
+                if(WaypointManager.getWaypointList(player).isEmpty()){
                     player.sendMessage((ChatColor.RED + "You don't have any waypoints! Use ") + (ChatColor.AQUA + "/waypoint add <Waypoint Name>") + (ChatColor.RED + " to create more waypoints."));
                     return true;
                 }
                 player.sendMessage(ChatColor.AQUA + "You currently have the following waypoints:");
-                for(String wps : playerWaypoints.keySet()){
-                    player.sendMessage((ChatColor.GOLD + wps) + (ChatColor.YELLOW + " at Position " + String.valueOf(playerWaypoints.get(wps).getBlockX()) + " " + String.valueOf(playerWaypoints.get(wps).getBlockY()) + " " + String.valueOf(playerWaypoints.get(wps).getBlockZ()) + " " + "at Dimension " + playerWPDimensions.get(wps)));
+                for(Waypoint wp : WaypointManager.getWaypointList(player).getValues()){
+                    player.sendMessage((ChatColor.GOLD + wp.getName()) + (ChatColor.YELLOW + " in ") + (ChatColor.GOLD + wp.getWorld().getName()) + (ChatColor.YELLOW + " at ") + (ChatColor.GOLD + wp.posToString()));
                 }
             }
         }else if(args.length == 2){
-            if(args[0].equals("list")) {
-                player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
-                return true;
-            } else if (args[0].equals("add")){
-                if(playerWaypoints.containsKey(args[1])){
-                    player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "already exists! If you wish to override the position of the waypoint, please use ") + (ChatColor.GOLD + "/waypoint override <Waypoint Name>."));
+            if(args[0].equals("list")){
+                if(WaypointManager.getWaypointList(player).isEmpty()){
+                    player.sendMessage((ChatColor.RED + "You don't have any waypoints! Use ") + (ChatColor.AQUA + "/waypoint add <Waypoint Name>") + (ChatColor.RED + " to create more waypoints."));
                     return true;
                 }
-                playerWaypoints.put(args[1],player.getLocation());
-                playerWPDimensions.put(args[1],checkPlayerDimension(player));
-                player.sendMessage((ChatColor.AQUA + "You have added Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\"."));
-                return true;
-            } else if (args[0].equals("remove")) {
-                if(!playerWaypoints.containsKey(args[1])){
-                    player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "does not exist!"));
-                    return true;
+                player.sendMessage(ChatColor.AQUA + "You currently have the following waypoints:");
+                for(Waypoint wp : WaypointManager.getWaypointList(player).getValues()){
+                    player.sendMessage((ChatColor.GOLD + wp.getName()) + (ChatColor.YELLOW + " in ") + (ChatColor.GOLD + wp.getWorld().getName()) + (ChatColor.YELLOW + " at ") + (ChatColor.GOLD + wp.posToString()));
                 }
-                playerWaypoints.remove(args[1]);
-                playerWPDimensions.remove(args[1]);
-                player.sendMessage((ChatColor.AQUA + "You have removed Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\"."));
-                return true;
-            } else if (args[0].equals("goto")) {
-                if(!playerWaypoints.containsKey(args[1])){
-                    player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "does not exist!"));
-                    return true;
-                }
-                player.teleport(playerWaypoints.get(args[1]));
-                player.sendMessage((ChatColor.AQUA + "You have teleported to Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\"."));
-                return true;
-            } else if (args[0].equals("override")) {
-                if(!playerWaypoints.containsKey(args[1])){
-                    player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "does not exist!"));
-                    return true;
-                }
-
-                player.sendMessage((ChatColor.AQUA + "You have overrided Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\"") + (ChatColor.AQUA + " from ") + (ChatColor.GOLD + String.valueOf(playerWaypoints.get(args[1]).getBlockX() + " " + String.valueOf(playerWaypoints.get(args[1]).getBlockY() + " " + String.valueOf(playerWaypoints.get(args[1]).getBlockZ() + " at Dimension ") + playerWPDimensions.get(args[1])) + (ChatColor.AQUA + " to ") + (ChatColor.GOLD + String.valueOf(player.getLocation().getBlockX()) + " " + String.valueOf(player.getLocation().getBlockY()) + " " + String.valueOf(player.getLocation().getBlockZ()) + " at Dimension " + checkPlayerDimension(player)))));
-                playerWaypoints.put(args[1],player.getLocation());
-                playerWPDimensions.put(args[1],checkPlayerDimension(player));
-                return true;
-            } else {
-                player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
-                return true;
             }
+
+            switch (args[0]) {
+                case "add":
+                    if (WaypointManager.hasWaypoint(player, args[1])) {
+                        player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "already exists! If you wish to override the position of the waypoint, please use ") + (ChatColor.GOLD + "/waypoint override <Waypoint Name>."));
+                        return true;
+                    }
+                    WaypointManager.addWaypoint(player, new Waypoint(args[1], player.getLocation()));
+                    player.sendMessage((ChatColor.AQUA + "You have added Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\"."));
+                    break;
+                case "remove":
+                    if (!WaypointManager.hasWaypoint(player, args[1])) {
+                        player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "does not exist!"));
+                        return true;
+                    }
+                    WaypointManager.removeWaypoint(player, args[1]);
+                    player.sendMessage((ChatColor.AQUA + "You have removed Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\"."));
+                    break;
+                case "goto":
+                    if (!WaypointManager.hasWaypoint(player, args[1])) {
+                        player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "does not exist!"));
+                        return true;
+                    }
+                    player.teleport(WaypointManager.getWaypoint(player, args[1]).toLocation());
+                    player.sendMessage((ChatColor.AQUA + "You have teleported to Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\"."));
+                    break;
+                case "override":
+                    if (!WaypointManager.hasWaypoint(player, args[1])) {
+                        player.sendMessage((ChatColor.RED + "The Waypoint with the name ") + (ChatColor.GOLD + "\"" + args[1] + "\" ") + (ChatColor.RED + "does not exist!"));
+                        return true;
+                    }
+
+                    player.sendMessage((ChatColor.AQUA + "You have overrided Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\""));
+                    WaypointManager.overrideWaypoint(player, args[1], new Waypoint(args[1],player.getLocation()));
+                    break;
+                default:
+                    player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
+                    break;
+            }
+            return true;
         } else {
             player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
             return true;
@@ -106,6 +107,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        Player player = (Player) sender;
         if (args.length == 1) {
             // Provide suggestions for the first argument ("/waypoint <arg>")
             List<String> suggestions = new ArrayList<>();
@@ -114,9 +116,15 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             suggestions.add("remove");
             suggestions.add("list");
             suggestions.add("override");
+            if(player.hasPermission("teleport.waypoint.admin")){
+                suggestions.add("listall");
+            }
             return suggestions;
         } else if (args.length == 2 && (args[0].equalsIgnoreCase("goto") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("override"))) {
-            List<String> suggestions = new ArrayList<>(playerWaypoints.keySet());
+            List<String> suggestions = new ArrayList<>();
+            for (Waypoint wp : WaypointManager.getWaypointList(player).getValues()) {
+                suggestions.add(wp.getName());
+            }
             return suggestions;
         } else {
             // No suggestions for other arguments

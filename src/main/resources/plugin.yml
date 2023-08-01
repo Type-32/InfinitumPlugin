@@ -32,3 +32,5 @@ permissions:
     default: true
   teleport.waypoint:
     default: true
+  teleport.waypoint.admin:
+    default: op
