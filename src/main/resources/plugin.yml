@@ -9,19 +9,14 @@ commands:
     usage: /tpa <Player Username>
   tpaccept:
     description: Accept a teleport request
-    usage: /tpaccept <Player Username>
   tpdeny:
     description: Deny a teleport request
-    usage: /tpdeny <Player Username>
   spawn:
     description: Teleport to the world spawn point
-    usage: /spawn
   back:
     description: Return to your previous location before last teleport
-    usage: /back
   waypoint:
     description: Waypoint System
-    usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>
 
 permissions:
   teleport.tpa:

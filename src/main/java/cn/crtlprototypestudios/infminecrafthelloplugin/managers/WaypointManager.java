@@ -15,43 +15,62 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class WaypointManager {
 
     private static HashMap<UUID, WaypointList> waypoints = new HashMap<>();
 
+    public static List<UUID> getPlayers(){
+        return new ArrayList<>(waypoints.keySet());
+    }
     public static Waypoint getWaypoint(Player player, String name){
+        preventNull(player);
         return waypoints.get(player.getUniqueId()).getWaypoint(name);
     }
     public static WaypointList getWaypointList(Player player){
+        preventNull(player);
         return waypoints.get(player.getUniqueId());
     }
     public static void addWaypoint(Player player, Waypoint waypoint){
+        preventNull(player);
         waypoints.get(player.getUniqueId()).addWaypoint(waypoint);
+        WaypointManager.saveAllWaypoints(InfMinecraftHelloPlugin.getInstance());
     }
     public static void removeWaypoint(Player player, Waypoint waypoint){
+        preventNull(player);
         waypoints.get(player.getUniqueId()).removeWaypoint(waypoint);
+        WaypointManager.saveAllWaypoints(InfMinecraftHelloPlugin.getInstance());
     }
     public static void removeWaypoint(Player player, String name){
+        preventNull(player);
         waypoints.get(player.getUniqueId()).removeWaypoint(name);
+        WaypointManager.saveAllWaypoints(InfMinecraftHelloPlugin.getInstance());
     }
     public static void renameWaypoint(Player player, String name, String newName){
+        preventNull(player);
         waypoints.get(player.getUniqueId()).renameWaypoint(name, newName);
+        WaypointManager.saveAllWaypoints(InfMinecraftHelloPlugin.getInstance());
     }
     public static void overrideWaypoint(Player player, String original, Waypoint waypoint){
+        preventNull(player);
         waypoints.get(player.getUniqueId()).overrideWaypoint(original, waypoint);
+        WaypointManager.saveAllWaypoints(InfMinecraftHelloPlugin.getInstance());
     }
     public static void clearWaypoints(Player player){
+        preventNull(player);
         waypoints.get(player.getUniqueId()).clearWaypoints();
+        WaypointManager.saveAllWaypoints(InfMinecraftHelloPlugin.getInstance());
     }
     public static boolean hasWaypoint(Player player, String name){
+        preventNull(player);
         return waypoints.get(player.getUniqueId()).hasWaypoint(name);
     }
     public static void saveAllWaypoints(InfMinecraftHelloPlugin plugin) {
         JSONArray waypointsJsonArray = new JSONArray();
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+        }
 
         for (Map.Entry<UUID, WaypointList> entry : waypoints.entrySet()) {
             UUID playerUUID = entry.getKey();
@@ -73,6 +92,9 @@ public class WaypointManager {
         }
     }
     public static void readAllWaypoints(InfMinecraftHelloPlugin plugin) {
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+        }
         File waypointsFile = new File(plugin.getDataFolder(), "waypoints.json");
 
         if (!waypointsFile.exists()) {
@@ -116,5 +138,9 @@ public class WaypointManager {
         } catch (IOException | ParseException e) {
             plugin.getLogger().severe("Error reading waypoints from file: " + e.getMessage());
         }
+    }
+    public static void preventNull(Player player){
+        if(waypoints.get(player.getUniqueId()) == null)
+            waypoints.put(player.getUniqueId(), new WaypointList());
     }
 }

@@ -66,7 +66,7 @@ public class TpaCommand implements CommandExecutor {
 
             tpaRequests.put(target.getUniqueId(), player.getUniqueId());
             target.sendMessage(createRequestMessage(player.getName()));
-            player.sendMessage((ChatColor.AQUA + "You have sent a teleport request to ") + (ChatColor.GOLD + target.getName()));
+            player.sendMessage((ChatColor.AQUA + "You have sent a teleport request to ") + (ChatColor.GOLD + target.getName()) + (ChatColor.AQUA + "."));
             return true;
 
         } else if(command.getName().equalsIgnoreCase("tpaccept")) {
@@ -86,8 +86,8 @@ public class TpaCommand implements CommandExecutor {
             requester.teleport(player);
             tpaRequests.remove(player.getUniqueId());
 
-            player.sendMessage((ChatColor.AQUA + "Accepted teleport request from ") + (ChatColor.GOLD + requester.getName()));
-            requester.sendMessage((ChatColor.GOLD + player.getName()) + (ChatColor.AQUA + " accepted your teleport request!"));
+            player.sendMessage((ChatColor.AQUA + "Accepted teleport request from ") + (ChatColor.GOLD + requester.getName()) + (ChatColor.AQUA + "."));
+            requester.sendMessage((ChatColor.GOLD + player.getName()) + (ChatColor.AQUA + " accepted your teleport request."));
 
             return true;
 
@@ -105,10 +105,9 @@ public class TpaCommand implements CommandExecutor {
                 return true;
             }
 
-            requester.teleport(player);
             tpaRequests.remove(player.getUniqueId());
 
-            player.sendMessage((ChatColor.AQUA + "Rejected teleport request from ") + (ChatColor.GOLD + requester.getName()));
+            player.sendMessage((ChatColor.AQUA + "Rejected teleport request from ") + (ChatColor.GOLD + requester.getName()) + (ChatColor.AQUA + "."));
             requester.sendMessage((ChatColor.GOLD + player.getName()) + (ChatColor.RED + " rejected your teleport request."));
 
             return true;

@@ -75,8 +75,8 @@ public class Waypoint {
         return String.format("%s in [%s] at [%f %f %f]",name,world.getName(),x,y,z);
     }
 
-    public String posToString(){
-        return String.format("%f %f %f",x,y,z);
+    public String posToString(boolean roundToNearestInt){
+        return !roundToNearestInt ? String.format("%f %f %f",x,y,z) : String.format("%d %d %d",(int)x,(int)y,(int)z);
     }
 
     public boolean equals(Waypoint waypoint){

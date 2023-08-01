@@ -4,6 +4,7 @@ import cn.crtlprototypestudios.infminecrafthelloplugin.classes.SettingsCategory;
 import cn.crtlprototypestudios.infminecrafthelloplugin.commands.*;
 import cn.crtlprototypestudios.infminecrafthelloplugin.listeners.PlayerEventListener;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.DeathManager;
+import cn.crtlprototypestudios.infminecrafthelloplugin.managers.WaypointManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -33,7 +34,11 @@ public class InfMinecraftHelloPlugin extends JavaPlugin {
         // Register your commands and event listeners here
         WaypointCommand waypointCommand = new WaypointCommand();
         RulesCommand rulesCommand = new RulesCommand();
-        getCommand("tpa").setExecutor(new TpaCommand());
+        TpaCommand tpaCommand = new TpaCommand();
+        getCommand("tpa").setExecutor(tpaCommand);
+        getCommand("tpaccept").setExecutor(tpaCommand);
+        getCommand("tpdeny").setExecutor(tpaCommand);
+
         getCommand("back").setExecutor(new BackCommand());
         getCommand("spawn").setExecutor(new SpawnCommand());
 
@@ -41,6 +46,13 @@ public class InfMinecraftHelloPlugin extends JavaPlugin {
         getCommand("waypoint").setTabCompleter(waypointCommand);
         //getCommand("rules").setExecutor(rulesCommand);
         //getCommand("rules").setTabCompleter(rulesCommand);
+
+        WaypointManager.readAllWaypoints(this);
+    }
+
+    @Override
+    public void onDisable(){
+        WaypointManager.saveAllWaypoints(this);
     }
 
     public static InfMinecraftHelloPlugin getInstance() {

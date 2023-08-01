@@ -2,6 +2,10 @@ package cn.crtlprototypestudios.infminecrafthelloplugin.commands;
 
 import cn.crtlprototypestudios.infminecrafthelloplugin.classes.Waypoint;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.WaypointManager;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -13,12 +17,30 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class WaypointCommand implements CommandExecutor, TabCompleter {
+
+    public TextComponent createListMessage(Waypoint waypoint) {
+        TextComponent message = new TextComponent(ChatColor.YELLOW + " -> ");
+
+        TextComponent waypointName = new TextComponent(ChatColor.GOLD + waypoint.getName());
+        waypointName.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/waypoint goto " + waypoint.getName()));
+        waypointName.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("Click to Teleport to Waypoint")));
+
+        TextComponent waypointCoords = new TextComponent(ChatColor.GOLD + waypoint.posToString(true));
+        waypointCoords.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, waypoint.posToString(true)));
+        waypointCoords.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("Click to Copy Coordinates to Clipboard")));
+
+        message.addExtra(waypointName);
+        message.addExtra((ChatColor.YELLOW + " in ") + (ChatColor.GOLD + waypoint.getWorld().getName()) + (ChatColor.YELLOW + " at "));
+        message.addExtra(waypointCoords);
+
+        return message;
+    }
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-
-        if(!command.getName().equalsIgnoreCase("waypoint")) return true;
 
         if(!(commandSender instanceof Player)) {
             commandSender.sendMessage(ChatColor.RED + "Only players can use this command!");
@@ -32,29 +54,51 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args.length == 1 ) {
-            if(!args[0].equals("list")) {
-                player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
-                return true;
-            }else{
-                if(WaypointManager.getWaypointList(player).isEmpty()){
+        if (args.length == 1) {
+            if(args[0].equals("list")) {
+                if(WaypointManager.getWaypointList(player).isEmpty() || WaypointManager.getWaypointList(player) == null){
                     player.sendMessage((ChatColor.RED + "You don't have any waypoints! Use ") + (ChatColor.AQUA + "/waypoint add <Waypoint Name>") + (ChatColor.RED + " to create more waypoints."));
                     return true;
                 }
                 player.sendMessage(ChatColor.AQUA + "You currently have the following waypoints:");
                 for(Waypoint wp : WaypointManager.getWaypointList(player).getValues()){
-                    player.sendMessage((ChatColor.GOLD + wp.getName()) + (ChatColor.YELLOW + " in ") + (ChatColor.GOLD + wp.getWorld().getName()) + (ChatColor.YELLOW + " at ") + (ChatColor.GOLD + wp.posToString()));
+                    player.sendMessage(createListMessage(wp));
                 }
+                return true;
             }
+            if(args[0].equals("listall")){
+                if(!player.isOp()){
+                    player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                    return true;
+                }
+                if(WaypointManager.getPlayers().isEmpty()){
+                    player.sendMessage(ChatColor.RED + "There are no available waypoints!");
+                    return true;
+                }
+                player.sendMessage(ChatColor.AQUA + "All Available Waypoints:");
+                for(UUID id : WaypointManager.getPlayers()){
+                    if (Bukkit.getPlayer(id) == null) {
+                        player.sendMessage(ChatColor.RED + "PlayerUUID " + id + " does not exist. Skipping This List.");
+                        continue;
+                    }
+                    player.sendMessage(ChatColor.GOLD + Bukkit.getPlayer(id).getName());
+                    for(Waypoint wp : WaypointManager.getWaypointList(Bukkit.getPlayer(id)).getValues()){
+                        player.sendMessage(createListMessage(wp));
+                    }
+                }
+                return true;
+            }
+            player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
+            return true;
         }else if(args.length == 2){
             if(args[0].equals("list")){
-                if(WaypointManager.getWaypointList(player).isEmpty()){
+                if(WaypointManager.getWaypointList(player).isEmpty() || WaypointManager.getWaypointList(player) == null){
                     player.sendMessage((ChatColor.RED + "You don't have any waypoints! Use ") + (ChatColor.AQUA + "/waypoint add <Waypoint Name>") + (ChatColor.RED + " to create more waypoints."));
                     return true;
                 }
                 player.sendMessage(ChatColor.AQUA + "You currently have the following waypoints:");
                 for(Waypoint wp : WaypointManager.getWaypointList(player).getValues()){
-                    player.sendMessage((ChatColor.GOLD + wp.getName()) + (ChatColor.YELLOW + " in ") + (ChatColor.GOLD + wp.getWorld().getName()) + (ChatColor.YELLOW + " at ") + (ChatColor.GOLD + wp.posToString()));
+                    player.sendMessage(createListMessage(wp));
                 }
             }
 
@@ -92,6 +136,23 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage((ChatColor.AQUA + "You have overrided Waypoint ") + (ChatColor.GOLD + "\"" + args[1] + "\""));
                     WaypointManager.overrideWaypoint(player, args[1], new Waypoint(args[1],player.getLocation()));
                     break;
+                case "listall":
+                    if(!player.isOp()){
+                        player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                        return true;
+                    }
+                    if(WaypointManager.getPlayers().isEmpty()){
+                        player.sendMessage(ChatColor.RED + "There are no available waypoints!");
+                        return true;
+                    }
+                    player.sendMessage(ChatColor.AQUA + "All Available Waypoints:");
+                    for(UUID id : WaypointManager.getPlayers()){
+                        player.sendMessage(ChatColor.GOLD + player.getName());
+                        for(Waypoint wp : WaypointManager.getWaypointList(player).getValues()){
+                            player.sendMessage(createListMessage(wp));
+                        }
+                    }
+                    break;
                 default:
                     player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
                     break;
@@ -101,8 +162,6 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(ChatColor.GRAY + "Usage: /waypoint <goto|add|remove|list|override> <Waypoint Name>");
             return true;
         }
-
-        return false;
     }
 
     @Override
@@ -130,23 +189,5 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             // No suggestions for other arguments
             return null;
         }
-    }
-
-    public String checkPlayerDimension(Player player) {
-        World world = player.getWorld();
-        String dimensionName;
-
-        if (world.getEnvironment() == World.Environment.NORMAL) {
-            dimensionName = "Overworld";
-        } else if (world.getEnvironment() == World.Environment.NETHER) {
-            dimensionName = "Nether";
-        } else if (world.getEnvironment() == World.Environment.THE_END) {
-            dimensionName = "End";
-        } else {
-            // Custom dimension or unknown environment
-            dimensionName = "Unknown";
-        }
-
-        return dimensionName;
     }
 }
