@@ -66,6 +66,12 @@ public class WaypointManager {
         preventNull(player);
         return waypoints.get(player.getUniqueId()).hasWaypoint(name);
     }
+    public static void removePlayer(UUID uuid){
+        if(waypoints.containsKey(uuid)){
+            waypoints.remove(uuid);
+            WaypointManager.saveAllWaypoints(InfMinecraftHelloPlugin.getInstance());
+        }
+    }
     public static void saveAllWaypoints(InfMinecraftHelloPlugin plugin) {
         JSONArray waypointsJsonArray = new JSONArray();
         if (!plugin.getDataFolder().exists()) {
