@@ -1,5 +1,6 @@
 package cn.crtlprototypestudios.infminecrafthelloplugin.commands;
 
+import cn.crtlprototypestudios.infminecrafthelloplugin.managers.LocalesManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,10 +14,9 @@ import org.jetbrains.annotations.NotNull;
 public class SpawnCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if(!command.getName().equalsIgnoreCase("spawn")) return true;
 
         if(!(commandSender instanceof Player)) {
-            commandSender.sendMessage(ChatColor.RED + "Only players can use this command!");
+            commandSender.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.player_exclusive"));
             return true;
         }
 
@@ -25,9 +25,9 @@ public class SpawnCommand implements CommandExecutor {
 
         if (getOverworldSpawnLocation() != null){
             player.teleport(getOverworldSpawnLocation());
-            player.sendMessage(ChatColor.AQUA + "You have been teleported to World Spawn.");
+            player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.spawn.success"));
         } else {
-            player.sendMessage(ChatColor.RED + "Unable to fetch World Spawn from Overworld Saves Data.");
+            player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.spawn.failure"));
         }
         return true;
     }

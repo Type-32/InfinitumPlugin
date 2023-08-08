@@ -48,7 +48,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
         Player player = (Player) commandSender;
 
         if (args.length == 0){
-            player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.waypoint.usage"));
+            player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
             return true;
         }
 
@@ -87,7 +87,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                 }
                 return true;
             }
-            player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.waypoint.usage"));
+            player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
             return true;
         }else if(args.length == 2){
             if(args[0].equals("list")) {
@@ -159,12 +159,12 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
                 default:
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.waypoint.usage"));
+                    player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
                     break;
             }
             return true;
         } else {
-            player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.waypoint.usage"));
+            player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
             return true;
         }
     }
