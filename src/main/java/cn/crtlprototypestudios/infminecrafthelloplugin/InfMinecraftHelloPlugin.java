@@ -4,6 +4,7 @@ import cn.crtlprototypestudios.infminecrafthelloplugin.classes.SettingsCategory;
 import cn.crtlprototypestudios.infminecrafthelloplugin.commands.*;
 import cn.crtlprototypestudios.infminecrafthelloplugin.listeners.PlayerEventListener;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.DeathManager;
+import cn.crtlprototypestudios.infminecrafthelloplugin.managers.LocalesManager;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.WaypointManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,6 +31,8 @@ public class InfMinecraftHelloPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         getServer().getPluginManager().registerEvents(new PlayerEventListener(), this);
+
+        //Initialize locales
 
         // Register your commands and event listeners here
         WaypointCommand waypointCommand = new WaypointCommand();
