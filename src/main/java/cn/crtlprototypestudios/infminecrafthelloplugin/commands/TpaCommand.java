@@ -1,23 +1,28 @@
 package cn.crtlprototypestudios.infminecrafthelloplugin.commands;
 
+import cn.crtlprototypestudios.infminecrafthelloplugin.classes.Waypoint;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.LocalesManager;
+import cn.crtlprototypestudios.infminecrafthelloplugin.managers.WaypointManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Content;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
-public class TpaCommand implements CommandExecutor {
-    private HashMap<UUID, UUID> tpaRequests = new HashMap<>();
+public class TpaCommand implements CommandExecutor, TabCompleter {
+    private HashMap<UUID, ArrayList<UUID>> tpaRequests = new HashMap<>();
 
     public TextComponent createRequestMessage(String senderName, String receiverName) {
         TextComponent message = new TextComponent(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.tpa.request_message").format(ChatColor.GOLD + senderName,ChatColor.GOLD + senderName,ChatColor.GOLD + receiverName));
@@ -56,7 +61,7 @@ public class TpaCommand implements CommandExecutor {
             Player target = Bukkit.getPlayer(args[0]);
 
             if(target == null) {
-                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpa.null_player").format(args[0]));
+                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpa.null_player").format(ChatColor.GOLD + args[0]));
                 return true;
             }
 
@@ -65,7 +70,9 @@ public class TpaCommand implements CommandExecutor {
                 return true;
             }
 
-            tpaRequests.put(target.getUniqueId(), player.getUniqueId());
+            if(tpaRequests.get(target.getUniqueId()) == null) tpaRequests.put(target.getUniqueId(), new ArrayList<>(1));
+
+            tpaRequests.get(target.getUniqueId()).add(player.getUniqueId());
             target.sendMessage(createRequestMessage(player.getName(),target.getName()));
             player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.tpa.sent_request").format(ChatColor.GOLD + target.getName()));
             return true;
@@ -76,19 +83,38 @@ public class TpaCommand implements CommandExecutor {
                 return true;
             }
 
-            Player requester = Bukkit.getPlayer(tpaRequests.get(player.getUniqueId()));
+            if(args.length < 1 || args[0].equals("help")){
+                player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.tpaccept.usage"));
+                return true;
+            }
 
-            if (requester == null) {
+            ArrayList<UUID> requesters = tpaRequests.get(player.getUniqueId());
+
+            if (requesters.isEmpty()) {
                 player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpa.not_online"));
                 tpaRequests.remove(player.getUniqueId());
                 return true;
             }
 
-            requester.teleport(player);
-            tpaRequests.remove(player.getUniqueId());
+            Player requester = null;
 
-            player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.tpa.accepted_request").format(ChatColor.GOLD + requester.getName()));
-            requester.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.tpa.request_accepted").format(ChatColor.GOLD + player.getName()));
+            try{
+                requester = Bukkit.getPlayer(args[0]);
+            }catch (Exception e){
+                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpaccept.unavailable_sender").format(ChatColor.GOLD + args[0]));
+                //tpaRequests.remove(player.getUniqueId());
+                return true;
+            }
+
+            if(requesters.contains(requester.getUniqueId())){
+                requester.teleport(player);
+                tpaRequests.get(player.getUniqueId()).remove(requester.getUniqueId());
+
+                player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.tpaccept.success").format(ChatColor.GOLD + requester.getName()));
+                requester.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.tpa.request_accepted").format(ChatColor.GOLD + player.getName()));
+            }else{
+                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpaccept.unavailable_sender").format(ChatColor.GOLD + args[0]));
+            }
 
             return true;
 
@@ -98,22 +124,74 @@ public class TpaCommand implements CommandExecutor {
                 return true;
             }
 
-            Player requester = Bukkit.getPlayer(tpaRequests.get(player.getUniqueId()));
+            if(args.length < 1 || args[0].equals("help")){
+                player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.tpdeny.usage"));
+                return true;
+            }
 
-            if (requester == null) {
+            ArrayList<UUID> requesters = tpaRequests.get(player.getUniqueId());
+
+            if (requesters.isEmpty()) {
                 player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpa.not_online"));
                 tpaRequests.remove(player.getUniqueId());
                 return true;
             }
 
-            tpaRequests.remove(player.getUniqueId());
+            Player requester = null;
 
-            player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.tpa.denied_request").format(ChatColor.GOLD + requester.getName()));
-            requester.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpa.request_denied").format(ChatColor.GOLD + player.getName()));
+            try{
+                requester = Bukkit.getPlayer(args[0]);
+            }catch (Exception e){
+                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpdeny.unavailable_sender").format(ChatColor.GOLD + args[0]));
+                //tpaRequests.remove(player.getUniqueId());
+                return true;
+            }
+
+            if(requesters.contains(requester.getUniqueId())){
+                tpaRequests.get(player.getUniqueId()).remove(requester.getUniqueId());
+
+                player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.tpdeny.success").format(ChatColor.GOLD + requester.getName()));
+                requester.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.tpa.request_denied").format(ChatColor.GOLD + player.getName()));
+            }else{
+                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.tpdeny.unavailable_sender").format(ChatColor.GOLD + args[0]));
+            }
 
             return true;
 
         }
         return false;
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+        Player player = (Player) sender;
+        if(command.getName().equalsIgnoreCase("tpa")) {
+            if (args.length <= 1) {
+                // Provide suggestions for the first argument ("/tpa <arg>")
+                List<String> suggestions = new ArrayList<>();
+                Bukkit.getOnlinePlayers().forEach((p) -> {
+                    if (!p.equals(player)) {
+                        suggestions.add(p.getName());
+                    }
+                });
+                return suggestions;
+            }
+        }else if(command.getName().equalsIgnoreCase("tpaccept") || command.getName().equalsIgnoreCase("tpdeny")) {
+            if (args.length <= 1) {
+                // Provide suggestions for the first argument ("/tpa <arg>")
+                List<String> suggestions = new ArrayList<>();
+                tpaRequests.get(player.getUniqueId()).forEach((p) -> {
+                    if (!p.equals(player)) {
+                        try {
+                            suggestions.add(Bukkit.getPlayer(p).getName());
+                        }catch (Exception e){
+                            tpaRequests.get(player.getUniqueId()).remove(p);
+                        }
+                    }
+                });
+                return suggestions;
+            }
+        }
+        return null;
     }
 }
