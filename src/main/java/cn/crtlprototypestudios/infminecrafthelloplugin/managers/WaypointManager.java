@@ -1,8 +1,8 @@
 package cn.crtlprototypestudios.infminecrafthelloplugin.managers;
 
 import cn.crtlprototypestudios.infminecrafthelloplugin.InfMinecraftHelloPlugin;
-import cn.crtlprototypestudios.infminecrafthelloplugin.classes.Waypoint;
-import cn.crtlprototypestudios.infminecrafthelloplugin.classes.WaypointList;
+import cn.crtlprototypestudios.infminecrafthelloplugin.classes.waypoints.Waypoint;
+import cn.crtlprototypestudios.infminecrafthelloplugin.classes.waypoints.WaypointList;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;

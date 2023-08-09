@@ -1,9 +1,6 @@
-package cn.crtlprototypestudios.infminecrafthelloplugin.classes;
+package cn.crtlprototypestudios.infminecrafthelloplugin.classes.waypoints;
 
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;

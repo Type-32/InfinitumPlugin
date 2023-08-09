@@ -1,8 +1,6 @@
 package cn.crtlprototypestudios.infminecrafthelloplugin.commands;
 
-import cn.crtlprototypestudios.infminecrafthelloplugin.classes.Waypoint;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.LocalesManager;
-import cn.crtlprototypestudios.infminecrafthelloplugin.managers.WaypointManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;

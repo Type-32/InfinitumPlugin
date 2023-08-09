@@ -1,4 +1,4 @@
-package cn.crtlprototypestudios.infminecrafthelloplugin.classes;
+package cn.crtlprototypestudios.infminecrafthelloplugin.classes.waypoints;
 
 import org.bukkit.Location;
 import org.bukkit.World;

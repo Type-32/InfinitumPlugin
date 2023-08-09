@@ -38,6 +38,8 @@ public class InfMinecraftHelloPlugin extends JavaPlugin {
         WaypointCommand waypointCommand = new WaypointCommand();
         RulesCommand rulesCommand = new RulesCommand();
         TpaCommand tpaCommand = new TpaCommand();
+        FactionsCommand factionsCommand = new FactionsCommand();
+
         getCommand("tpa").setExecutor(tpaCommand);
         getCommand("tpaccept").setExecutor(tpaCommand);
         getCommand("tpdeny").setExecutor(tpaCommand);
@@ -47,6 +49,9 @@ public class InfMinecraftHelloPlugin extends JavaPlugin {
 
         getCommand("waypoint").setExecutor(waypointCommand);
         getCommand("waypoint").setTabCompleter(waypointCommand);
+
+        getCommand("factions").setExecutor(factionsCommand);
+        getCommand("factions").setTabCompleter(factionsCommand);
         //getCommand("rules").setExecutor(rulesCommand);
         //getCommand("rules").setTabCompleter(rulesCommand);
 

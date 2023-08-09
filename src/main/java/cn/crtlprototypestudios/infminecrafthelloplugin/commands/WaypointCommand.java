@@ -1,6 +1,6 @@
 package cn.crtlprototypestudios.infminecrafthelloplugin.commands;
 
-import cn.crtlprototypestudios.infminecrafthelloplugin.classes.Waypoint;
+import cn.crtlprototypestudios.infminecrafthelloplugin.classes.waypoints.Waypoint;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.LocalesManager;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.WaypointManager;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -8,7 +8,6 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -178,6 +177,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             suggestions.add("goto");
             suggestions.add("add");
             suggestions.add("remove");
+            suggestions.add("share");
             suggestions.add("list");
             suggestions.add("override");
             if(player.isOp()){
@@ -189,6 +189,18 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             for (Waypoint wp : WaypointManager.getWaypointList(player).getValues()) {
                 suggestions.add(wp.getName());
             }
+            return suggestions;
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("share")){
+            List<String> suggestions = new ArrayList<>();
+            for (Waypoint wp : WaypointManager.getWaypointList(player).getValues()) {
+                suggestions.add(wp.getName());
+            }
+            return suggestions;
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("share")){
+            List<String> suggestions = new ArrayList<>();
+            suggestions.add("everyone");
+            suggestions.add("with");
+            suggestions.add("faction");
             return suggestions;
         } else {
             // No suggestions for other arguments
