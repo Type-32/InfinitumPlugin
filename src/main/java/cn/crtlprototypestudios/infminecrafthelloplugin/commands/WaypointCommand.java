@@ -157,6 +157,9 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     break;
+                case "share":
+
+                    break;
                 default:
                     player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
                     break;
