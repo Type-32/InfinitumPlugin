@@ -24,6 +24,16 @@ public class FactionPlayerInfo {
         this.username = player.getName();
         this.uuid = player.getUniqueId();
     }
+    @Override
+    public boolean equals(Object obj){
+        if(obj instanceof FactionPlayerInfo){
+            FactionPlayerInfo factionPlayerInfo = (FactionPlayerInfo) obj;
+            if(factionPlayerInfo.getUUID().equals(uuid)){
+                return true;
+            }
+        }
+        return false;
+    }
     public UUID getUUID(){
         return uuid;
     }

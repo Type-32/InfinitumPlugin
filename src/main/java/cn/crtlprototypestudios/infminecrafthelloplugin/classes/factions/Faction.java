@@ -28,6 +28,7 @@ public class Faction {
         this.prefixColor = ChatColor.valueOf((String) factionJSON.get("prefixColor"));
         this.suffixColor = ChatColor.valueOf((String) factionJSON.get("suffixColor"));
         this.vault = new EconomyVault((JSONObject) factionJSON.get("vault"));
+        this.factionSettings = new FactionSettings((JSONObject) factionJSON.get("factionSettings"));
     }
     public Faction(String name, FactionPlayerInfo leader, ChatColor color){
         this.name = name;

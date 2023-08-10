@@ -76,6 +76,7 @@ public class EconomyVault {
         object.put("ownerUsername", this.ownerUsername);
         object.put("money", this.money);
         object.put("history", this.history);
+        object.put("settings", this.settings.toJSONObject());
         return object;
     }
 }

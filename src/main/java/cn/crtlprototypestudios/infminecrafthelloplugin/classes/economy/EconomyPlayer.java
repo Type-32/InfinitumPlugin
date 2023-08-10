@@ -10,7 +10,6 @@ public class EconomyPlayer {
     private UUID uuid = null;
     private int reknown = 100;
     private int money = 0;
-    private int maxVault = 2;
     private ArrayList<EconomyVault> vaults = new ArrayList<EconomyVault>();
     private ArrayList<EconomyHistory> history = new ArrayList<EconomyHistory>();
     public EconomyPlayerSettings settings = new EconomyPlayerSettings();
@@ -123,6 +122,9 @@ public class EconomyPlayer {
         json.put("uuid", this.uuid.toString());
         json.put("reknown", this.reknown);
         json.put("money", this.money);
+        json.put("history", this.history);
+        json.put("vaults", this.vaults);
+        json.put("settings", this.settings.toJSONObject());
         return json;
     }
 }

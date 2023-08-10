@@ -63,17 +63,6 @@ public class FactionsManager {
         }
         return false;
     }
-    public static Faction getFactionFromPlayer(Player player){
-        if(factions.isEmpty()) return null;
-        for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
-                    return playerInfo.getFaction();
-                }
-            }
-        }
-        return null;
-    }
     public static void addPlayerToFaction(Player player, Faction faction, boolean isMember, boolean isModerator, boolean isLeader){
         for (Faction faction1 : factions) {
             for (FactionPlayerInfo playerInfo : faction1.getMembers()) {
@@ -98,12 +87,22 @@ public class FactionsManager {
         if(!findPlayerInFaction(player)) return null;
         for (Faction faction : factions) {
             for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
+                if (playerInfo.getUUID().equals(player.getUniqueId())) {
+                    if(!player.getName().equals(playerInfo.getUUID().toString())){
+                        playerInfo.setPlayer(player);
+                    }
                     return faction;
                 }
             }
         }
         return null;
+    }
+    public static void updatePlayerInfos(){
+        InfMinecraftHelloPlugin.getInstance().getServer().getOnlinePlayers().forEach(player -> {
+            if(findPlayerInFaction(player)){
+                getPlayerInFaction(player).setPlayer(player);
+            }
+        });
     }
     public static void writeToFile() {
         JSONArray factionsJsonArray = new JSONArray();

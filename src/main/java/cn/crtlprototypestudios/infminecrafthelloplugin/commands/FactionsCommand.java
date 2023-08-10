@@ -2,6 +2,7 @@ package cn.crtlprototypestudios.infminecrafthelloplugin.commands;
 
 import cn.crtlprototypestudios.infminecrafthelloplugin.classes.factions.Faction;
 import cn.crtlprototypestudios.infminecrafthelloplugin.classes.factions.FactionPlayerInfo;
+import cn.crtlprototypestudios.infminecrafthelloplugin.classes.factions.FactionSettings;
 import cn.crtlprototypestudios.infminecrafthelloplugin.classes.waypoints.Waypoint;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.FactionsManager;
 import cn.crtlprototypestudios.infminecrafthelloplugin.managers.LocalesManager;
@@ -72,13 +73,13 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             return suggestions;
         } else if (args.length == 2) {
             if(args[0].equalsIgnoreCase("promote")) {
-                Faction f = FactionsManager.getFactionFromPlayer(player);
+                Faction f = FactionsManager.getPlayerFaction(player);
                 for (FactionPlayerInfo p : f.getMembers()) {
                     suggestions.add(p.getUsername());
                 }
                 return suggestions;
             }else if (args[0].equalsIgnoreCase("demote")){
-                Faction f = FactionsManager.getFactionFromPlayer(player);
+                Faction f = FactionsManager.getPlayerFaction(player);
                 for (FactionPlayerInfo p : f.getModerators()) {
                     suggestions.add(p.getUsername());
                 }
@@ -86,12 +87,12 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             }else if (args[0].equalsIgnoreCase("kick")){
                 FactionPlayerInfo f = FactionsManager.getPlayerInFaction(player);
                 if(f.isModerator()){
-                    Faction faction = FactionsManager.getFactionFromPlayer(player);
+                    Faction faction = FactionsManager.getPlayerFaction(player);
                     for (FactionPlayerInfo p : faction.getMembers()) {
                         suggestions.add(p.getUsername());
                     }
                 }else if(f.isLeader()){
-                    Faction faction = FactionsManager.getFactionFromPlayer(player);
+                    Faction faction = FactionsManager.getPlayerFaction(player);
                     for (FactionPlayerInfo p : faction.getAllMembers(true)) {
                         if(!p.isLeader()){
                             suggestions.add(p.getUsername());
@@ -99,6 +100,29 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     }
                 }
                 return suggestions;
+            }else if (args[0].equalsIgnoreCase("color")){
+                for(ChatColor c : ChatColor.values()){
+                    suggestions.add(c.name());
+                }
+                return suggestions;
+            }else if (args[0].equalsIgnoreCase("prefix") || args[0].equalsIgnoreCase("suffix")){
+                suggestions.clear();
+                return suggestions;
+            }else if (args[0].equalsIgnoreCase("invite")) {
+                Faction faction = FactionsManager.getPlayerFaction(player);
+                for (Player p : player.getServer().getOnlinePlayers()) {
+                    if(!FactionsManager.isPlayerLeader(p)) suggestions.add(p.getName());
+                }
+                return suggestions;
+            }else if (args[0].equalsIgnoreCase("join")) {
+                for (Faction f : FactionsManager.getFactions()) {
+                    if(f.factionSettings.factionPublic) suggestions.add(f.getName());
+                }
+                return suggestions;
+            }else if (args[0].equalsIgnoreCase("rules")){
+                if(FactionsManager.isPlayerLeader(player)){
+                    suggestions.addAll(FactionSettings.getRulesKey());
+                }
             }
         } else if (args.length == 3){
 
