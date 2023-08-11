@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FactionSettings {
-    public boolean membersPublic = false;
-    public boolean moderatorsPublic = false;
-    public boolean leadersPublic = false;
-    public boolean alliedFactionsPublic = false;
-    public boolean enemyFactionsPublic = false;
+    public boolean membersPublic = true;
+    public boolean moderatorsPublic = true;
+    public boolean leadersPublic = true;
+    public boolean alliedFactionsPublic = true;
+    public boolean enemyFactionsPublic = true;
     public boolean factionPublic = true;
     public boolean allowFreeJoin = false;
-    public boolean allowFreeLeave = false;
+    public boolean allowFreeLeave = true;
     public int maxMembers = 10;
     public int maxModerators = 3;
     public JSONObject toJSONObject(){

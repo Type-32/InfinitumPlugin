@@ -23,6 +23,7 @@ public class Faction {
     private ChatColor color = ChatColor.WHITE;
     private ChatColor prefixColor = ChatColor.WHITE;
     private ChatColor suffixColor = ChatColor.WHITE;
+    private String factionId = "";
     public FactionSettings factionSettings;
     public Faction(JSONObject factionJSON){
         this.name = (String) factionJSON.get("name");
@@ -33,11 +34,22 @@ public class Faction {
         this.suffixColor = ChatColor.valueOf((String) factionJSON.get("suffixColor"));
         this.vault = new EconomyVault((JSONObject) factionJSON.get("vault"));
         this.factionSettings = new FactionSettings((JSONObject) factionJSON.get("factionSettings"));
+        this.factionId = (String) factionJSON.get("factionId");
     }
     public Faction(String name, FactionPlayerInfo leader, ChatColor color){
         this.name = name;
         this.leader = leader;
         this.color = color;
+        this.prefixColor = color;
+        this.suffixColor = color;
+        this.prefix = "[" + name + "] ";
+        this.suffix = "";
+        this.vault = new EconomyVault("Faction " + name + "'s Vault", leader.getUsername(), leader.getUUID(), 0);
+        this.factionSettings = new FactionSettings();
+        this.factionId = FactionsManager.generateFactionId();
+    }
+    public String getFactionId(){
+        return factionId;
     }
     public void setVault(int vault){
         this.vault.setMoney(vault);

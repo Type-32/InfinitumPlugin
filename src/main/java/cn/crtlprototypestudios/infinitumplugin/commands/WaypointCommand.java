@@ -192,6 +192,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                             }
                             WaypointManager.shareWaypoint(player, target, args[1]);
                             player.sendMessage(LocalesManager.Locales.getString("msg.command.waypoint.share.success").format(ChatColor.GOLD + "\"" + args[1] + "\"", ChatColor.GOLD + target.getName()));
+                            // TODO: compose clickable message for receiver
                         }
                     }
                 }

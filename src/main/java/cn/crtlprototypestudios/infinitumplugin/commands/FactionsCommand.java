@@ -1,10 +1,14 @@
 package cn.crtlprototypestudios.infinitumplugin.commands;
 
 import cn.crtlprototypestudios.infinitumplugin.classes.factions.Faction;
+import cn.crtlprototypestudios.infinitumplugin.classes.factions.FactionInvite;
 import cn.crtlprototypestudios.infinitumplugin.classes.factions.FactionPlayerInfo;
 import cn.crtlprototypestudios.infinitumplugin.classes.factions.FactionSettings;
 import cn.crtlprototypestudios.infinitumplugin.managers.FactionsManager;
 import cn.crtlprototypestudios.infinitumplugin.managers.LocalesManager;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -17,9 +21,121 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class FactionsCommand implements CommandExecutor, TabCompleter {
+    public TextComponent composeListMessage(Faction faction){
+        /*
+        Faction Information:
+            - Name: <faction name>
+            - Owner: <faction owner>
+            - Money: <faction money>
+            - Moderators:
+                -> <faction moderator 1>
+                -> <faction moderator 2>
+                ...
+                -> <faction moderator n>
+            - Members:
+                -> <faction member 1>
+                -> <faction member 2>
+                ...
+                -> <faction member n>
+            - Allied Factions:
+                -> <faction allied 1>
+                -> <faction allied 2>
+                ...
+                -> <faction allied n>
+            - Enemy Factions:
+                -> <faction enemy 1>
+                -> <faction enemy 2>
+                ...
+                -> <faction enemy n>
+         */
+        TextComponent message = new TextComponent();
+        message.addExtra(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.info.header"));
+        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.name") + (faction.getColor() + faction.getName()));
+        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.owner") + faction.getLeader().getPlayer().getName());
+        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.money") + faction.getVault().getMoney());
+        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.moderators"));
+        for(FactionPlayerInfo moderator : faction.getModerators()){
+            message.addExtra(ChatColor.GRAY + "        -> " + moderator.getPlayer().getName());
+        }
+        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.members"));
+        for(FactionPlayerInfo member : faction.getMembers()){
+            message.addExtra(ChatColor.GRAY + "        -> " + member.getPlayer().getName());
+        }
+        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.allied"));
+        for(Faction allied : faction.getAlliedFactions()){
+            message.addExtra(ChatColor.GRAY + "        -> " + allied.getName());
+        }
+        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.enemies"));
+        for(Faction enemy : faction.getEnemyFactions()){
+            message.addExtra(ChatColor.GRAY + "        -> " + enemy.getName());
+        }
+        return message;
+    }
+    public TextComponent composeFactionsList(List<Faction> factions, boolean isPlayerOp){
+        /*
+        Factions List:
+            - <faction 1>
+            - <faction 2>
+            ...
+            - <faction n>
+         */
+        TextComponent message = new TextComponent();
+        message.addExtra(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.list.header"));
+        for(Faction faction : factions){
+
+            //Faction Member Number and HoverEvent Member List
+            TextComponent factionMemberNumber = new TextComponent();
+            String memberList = "";
+            for(FactionPlayerInfo member : faction.getMembers()){
+                memberList += ((faction.factionSettings.membersPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + member.getUsername()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
+            }
+            factionMemberNumber.setText((faction.factionSettings.membersPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getMembers().size()));
+            factionMemberNumber.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(memberList)));
+
+            //Faction Moderator Number and HoverEvent Moderator List
+            TextComponent factionModeratorNumber = new TextComponent();
+            String moderatorList = "";
+            for(FactionPlayerInfo moderator : faction.getModerators()){
+                moderatorList += ((faction.factionSettings.moderatorsPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + moderator.getUsername()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
+            }
+            factionModeratorNumber.setText((faction.factionSettings.moderatorsPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getModerators().size()));
+            factionModeratorNumber.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(moderatorList)));
+
+            //Faction Leader and HoverEvent Leader
+            TextComponent factionLeader = new TextComponent();
+            factionLeader.setText((faction.factionSettings.leadersPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + faction.getLeader().getPlayer().getName());
+
+            //Faction Allies and HoverEvent Allies
+            TextComponent factionAllies = new TextComponent();
+            String alliesList = "";
+            for(Faction allied : faction.getAlliedFactions()){
+                alliesList += ((faction.factionSettings.alliedFactionsPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + allied.getName()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
+            }
+            factionAllies.setText((faction.factionSettings.alliedFactionsPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getAlliedFactions().size()));
+            factionAllies.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(alliesList)));
+
+            //Faction Enemies and HoverEvent Enemies
+            TextComponent factionEnemies = new TextComponent();
+            String enemiesList = "";
+            for(Faction enemy : faction.getEnemyFactions()){
+                enemiesList += ((faction.factionSettings.enemyFactionsPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + enemy.getName()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
+            }
+            factionEnemies.setText((faction.factionSettings.enemyFactionsPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getEnemyFactions().size()));
+            factionEnemies.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(enemiesList)));
+
+            message.addExtra(ChatColor.GRAY + "    - " + ((faction.factionSettings.factionPublic || isPlayerOp ? faction.getColor() : ChatColor.MAGIC) + faction.getName()));
+            if(faction.factionSettings.factionPublic || isPlayerOp){
+                message.addExtra((ChatColor.GRAY) + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.owner") + factionLeader);
+                message.addExtra((ChatColor.GRAY) + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.moderators") + factionModeratorNumber);
+                message.addExtra(ChatColor.GRAY + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.members") + factionMemberNumber);
+                message.addExtra(ChatColor.GRAY + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.allied") + factionAllies);
+                message.addExtra(ChatColor.GRAY + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.enemies") + factionEnemies);
+            }
+        }
+        return message;
+    }
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         Player player = (Player) commandSender;
@@ -40,20 +156,14 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.list.no_factions"));
                         return true;
                     }
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.factions.list.header"));
-                    for(Faction faction : FactionsManager.getFactions()){
-                        player.sendMessage(ChatColor.GRAY + " - " + ChatColor.GREEN + faction.getName());
-                    }
+                    player.sendMessage(composeFactionsList(FactionsManager.getFactions(), false));
                     return true;
                 case "listall":
                     if(FactionsManager.getFactions().isEmpty()){
                         player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.list.no_factions"));
                         return true;
                     }
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.factions.list.header"));
-                    for(Faction faction : FactionsManager.getFactions()){
-                        player.sendMessage(ChatColor.GRAY + " - " + ChatColor.GREEN + faction.getName());
-                    }
+                    player.sendMessage(composeFactionsList(FactionsManager.getFactions(), player.isOp()));
                     return true;
                 case "info":
                     if(!FactionsManager.findPlayerInFaction(player)){
@@ -61,7 +171,8 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                     Faction faction = FactionsManager.getPlayerInFaction(player).getFaction();
-                    //TODO: add a list of information regarding this faction. Including: name, leader, members, etc.
+
+                    player.sendMessage(composeListMessage(faction));
                     return true;
                 case "leave":
                     if(!FactionsManager.findPlayerInFaction(player)){
@@ -154,7 +265,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 if(FactionsManager.factionInvites.get(target.getUniqueId()) == null || FactionsManager.factionInvites.get(target.getUniqueId()).isEmpty()){
                     FactionsManager.factionInvites.put(target.getUniqueId(), new ArrayList<>());
                 }
-                FactionsManager.factionInvites.get(target.getUniqueId()).add(FactionsManager.getPlayerFaction(player).getLeader().getUUID());
+                FactionsManager.factionInvites.get(target.getUniqueId()).add(new FactionInvite(player, FactionsManager.getPlayerFaction(player)));
             }
 
             if(args[0].equalsIgnoreCase("kick")){
@@ -327,35 +438,79 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             }
 
             if(args[0].equalsIgnoreCase("invites") && (args[1].equalsIgnoreCase("accept") || args[1].equalsIgnoreCase("deny"))){
-                List<UUID> inviters = FactionsManager.factionInvites.get(player);
-                inviters.removeIf(uuid -> Bukkit.getPlayer(uuid) == null);
+                List<FactionInvite> inviters = FactionsManager.factionInvites.get(player);
 
-                //TODO: Finish this; The factionsInvites is currently a HashMap<UUID, List<UUID>> which is not okay; change it to sth like HashMap<UUID, HashMap<UUID, Faction>> where the invite includes the Faction, making it easier to write code here.
                 if(args[1].equalsIgnoreCase("accept")){
-                    //TODO: finish /factions invites accept <Faction Name>
-                    /*
-                    try{
-                        FactionsManager.joinFaction(player, args[2]);
-                        player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.accepted"));
+                    if(inviters == null || inviters.isEmpty()){
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_invites"));
                         return true;
-                    } catch (Exception e){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_invalid_faction"));
+                    }
+                    if(args.length == 2 || args[2].isEmpty() || args[2].equalsIgnoreCase("")){
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_faction"));
                         return true;
-                    }*/
-                }else if (args[1].equalsIgnoreCase("deny")){
-                    //TODO: finish /factions invites deny <Faction Name>
-                    /*
-                    player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.denied"));
-                    for(UUID i : FactionsManager.factionInvites.get(player.getUniqueId())){
-                        if(Bukkit.getPlayer(i) != null){
-                            if(FactionsManager.isSameFaction(FactionsManager.getFaction(args[2]), FactionsManager.getPlayerFaction(Bukkit.getPlayer(i)))){
-                                Bukkit.getPlayer(i).sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.denied_by_player").replace("%player%", player.getName()));
+                    }
+                    Faction invitingFaction = FactionsManager.getFaction(args[2]);
+                    if(invitingFaction == null){
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.invalid_faction"));
+                        FactionsManager.factionInvites.get(player).clear();
+                        return true;
+                    }
+                    for(FactionInvite i : inviters){
+                        if(i.faction.equals(invitingFaction) || invitingFaction.getAllMembers(false).contains(i.sender)){
+                            try{
+                                FactionsManager.joinFaction(player, invitingFaction.getName());
+                                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.accepted"));
+                                if(Bukkit.getPlayer(i.sender.getUUID()) == null){
+                                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_offline"));
+                                }else{
+                                    Bukkit.getPlayer(i.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_accepted"));
+                                }
+                            } catch (Exception e){
+                                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_invalid_faction"));
                             }
+                            if(!FactionsManager.factionInvites.get(player.getUniqueId()).isEmpty()){
+                                for(FactionInvite inv : FactionsManager.factionInvites.get(player.getUniqueId())){
+                                    Bukkit.getPlayer(inv.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_denied"));
+                                }
+                            }
+                            FactionsManager.factionInvites.get(player.getUniqueId()).clear();
+                            return true;
                         }
                     }
 
-                    return true;
-                    */
+                } else if (args[1].equalsIgnoreCase("deny")){
+                    if(inviters == null || inviters.isEmpty()){
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_invites"));
+                        return true;
+                    }
+                    if(args.length == 2 || args[2].isEmpty() || args[2].equalsIgnoreCase("")){
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_faction"));
+                        return true;
+                    }
+                    Faction invitingFaction = FactionsManager.getFaction(args[2]);
+                    if(invitingFaction == null){
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.invalid_faction"));
+                        FactionsManager.factionInvites.get(player).clear();
+                        return true;
+                    }
+                    for(FactionInvite i : inviters){
+                        if(i.faction.equals(invitingFaction) || invitingFaction.getAllMembers(false).contains(i.sender)){
+                            try{
+                                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.denied"));
+                                if(Bukkit.getPlayer(i.sender.getUUID()) == null){
+                                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_offline"));
+                                }else{
+                                    Bukkit.getPlayer(i.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_denied"));
+                                }
+                            } catch (Exception e){
+                                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_invalid_faction"));
+                            }
+                            FactionsManager.factionInvites.get(player.getUniqueId()).remove(i);
+                            return true;
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("list")) {
+
                 }
             }
         }
@@ -463,8 +618,8 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 }
                 if(FactionsManager.factionInvites.get(player.getUniqueId()).isEmpty()) return null;
 
-                for(UUID u : FactionsManager.factionInvites.get(player.getUniqueId())){
-                    suggestions.add(FactionsManager.getPlayerFaction(u).getName());
+                for(FactionInvite i : FactionsManager.factionInvites.get(player.getUniqueId())){
+                    suggestions.add(i.faction.getName());
                 }
             }
         } else {

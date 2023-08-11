@@ -2,7 +2,9 @@ package cn.crtlprototypestudios.infinitumplugin.managers;
 
 import cn.crtlprototypestudios.infinitumplugin.InfinitumPlugin;
 import cn.crtlprototypestudios.infinitumplugin.classes.factions.Faction;
+import cn.crtlprototypestudios.infinitumplugin.classes.factions.FactionInvite;
 import cn.crtlprototypestudios.infinitumplugin.classes.factions.FactionPlayerInfo;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONArray;
@@ -21,7 +23,30 @@ import java.util.UUID;
 
 public class FactionsManager {
     private static List<Faction> factions = new ArrayList<>();
-    public static HashMap<UUID, List<UUID>> factionInvites = new HashMap<>();
+    public static HashMap<UUID, List<FactionInvite>> factionInvites = new HashMap<>();
+
+    public static FactionInvite findInvite(String factionId){
+        if(factionInvites.isEmpty()) return null;
+        for (UUID uuid : factionInvites.keySet()) {
+            for (FactionInvite factionInvite : factionInvites.get(uuid)) {
+                if(factionInvite.faction.getFactionId().equals(factionId)){
+                    return factionInvite;
+                }
+            }
+        }
+        return null;
+    }
+    public static FactionInvite findInvite(Player player){
+        if(factionInvites.isEmpty()) return null;
+        for (UUID uuid : factionInvites.keySet()) {
+            for (FactionInvite factionInvite : factionInvites.get(uuid)) {
+                if(factionInvite.sender.getUUID().equals(player.getUniqueId())){
+                    return factionInvite;
+                }
+            }
+        }
+        return null;
+    }
 
     public static boolean findPlayerInFaction(Player player) {
         if(factions.isEmpty()) return false;
@@ -308,5 +333,13 @@ public class FactionsManager {
         if (faction != null) {
             faction.factionSettings.setSettingsValue(rules,value);
         }
+    }
+
+    public static String generateFactionId() {
+        String id = UUID.randomUUID().toString() + RandomStringUtils.randomAlphanumeric(5);
+        while (factionExists(id)) {
+            id = UUID.randomUUID().toString() + RandomStringUtils.randomAlphanumeric(5);
+        }
+        return id;
     }
 }

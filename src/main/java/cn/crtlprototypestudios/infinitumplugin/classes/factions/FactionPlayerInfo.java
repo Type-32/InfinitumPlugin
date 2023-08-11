@@ -1,5 +1,6 @@
 package cn.crtlprototypestudios.infinitumplugin.classes.factions;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 
@@ -19,6 +20,9 @@ public class FactionPlayerInfo {
     public FactionPlayerInfo(Player player){
         this.username = player.getName();
         this.uuid = player.getUniqueId();
+    }
+    public Player getPlayer(){
+        return (Player) Bukkit.getPlayer(uuid);
     }
     public void setPlayer(Player player){
         this.username = player.getName();
