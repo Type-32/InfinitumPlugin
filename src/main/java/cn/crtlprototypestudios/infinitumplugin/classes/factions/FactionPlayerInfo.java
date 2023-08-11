@@ -108,4 +108,5 @@ public class FactionPlayerInfo {
         jsonObject.put("faction", faction.toJSONObject());
         return jsonObject;
     }
+
 }

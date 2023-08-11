@@ -20,6 +20,7 @@ import java.util.*;
 public class WaypointManager {
 
     private static HashMap<UUID, WaypointList> waypoints = new HashMap<>();
+    public static HashMap<UUID, HashMap<UUID, List<Waypoint>>> sharedWaypoints = new HashMap<>();
 
     public static List<UUID> getPlayers(){
         return new ArrayList<>(waypoints.keySet());
@@ -31,6 +32,36 @@ public class WaypointManager {
     public static WaypointList getWaypointList(Player player){
         preventNull(player);
         return waypoints.get(player.getUniqueId());
+    }
+    public static void shareWaypoint(Player player, Player target, Waypoint waypoint){
+        preventNull(player);
+        preventNull(target);
+        if(!sharedWaypoints.containsKey(player.getUniqueId())){
+            sharedWaypoints.put(player.getUniqueId(), new HashMap<>());
+        }
+        if(!sharedWaypoints.get(player.getUniqueId()).isEmpty()) {
+            List<Waypoint> temp = new ArrayList<>();
+            temp.add(waypoint);
+            sharedWaypoints.get(player.getUniqueId()).put(target.getUniqueId(), temp);
+        }
+        if(sharedWaypoints.get(player.getUniqueId()).containsKey(target.getUniqueId())){
+            sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).add(waypoint);
+        }
+    }
+    public static void shareWaypoint(Player player, Player target, String waypointName){
+preventNull(player);
+        preventNull(target);
+        if(!sharedWaypoints.containsKey(player.getUniqueId())){
+            sharedWaypoints.put(player.getUniqueId(), new HashMap<>());
+        }
+        if(!sharedWaypoints.get(player.getUniqueId()).isEmpty()) {
+            List<Waypoint> temp = new ArrayList<>();
+            temp.add(getWaypoint(player, waypointName));
+            sharedWaypoints.get(player.getUniqueId()).put(target.getUniqueId(), temp);
+        }
+        if(sharedWaypoints.get(player.getUniqueId()).containsKey(target.getUniqueId())){
+            sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).add(getWaypoint(player, waypointName));
+        }
     }
     public static void addWaypoint(Player player, Waypoint waypoint){
         preventNull(player);

@@ -1,6 +1,7 @@
 package cn.crtlprototypestudios.infinitumplugin.commands;
 
 import cn.crtlprototypestudios.infinitumplugin.classes.waypoints.Waypoint;
+import cn.crtlprototypestudios.infinitumplugin.managers.FactionsManager;
 import cn.crtlprototypestudios.infinitumplugin.managers.LocalesManager;
 import cn.crtlprototypestudios.infinitumplugin.managers.WaypointManager;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -158,6 +159,10 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case "share":
+                    if(WaypointManager.getWaypoint(player, args[1]) == null){
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                        return true;
+                    }
 
                     break;
                 default:
@@ -165,10 +170,37 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     break;
             }
             return true;
+        } else if (args.length == 3) {
+            if(args[0].equalsIgnoreCase("share")){
+                if(args[2].equalsIgnoreCase("faction")){
+                    //TODO: composite clickable message
+                }
+            }
+
+        } else if (args.length >= 4) {
+            if(args[0].equalsIgnoreCase("share")){
+                if(args[2].equalsIgnoreCase("with")){
+                    for(int i = 3; i < args.length; i++){
+                        Player target = Bukkit.getPlayer(args[i]);
+                        if(target == null) {
+                            player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.share.nonexisting_player").format(ChatColor.GOLD + "\"" + args[i] + "\""));
+                            continue;
+                        }else{
+                            if(!WaypointManager.hasWaypoint(player, args[1])){
+                                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                                return true;
+                            }
+                            WaypointManager.shareWaypoint(player, target, args[1]);
+                            player.sendMessage(LocalesManager.Locales.getString("msg.command.waypoint.share.success").format(ChatColor.GOLD + "\"" + args[1] + "\"", ChatColor.GOLD + target.getName()));
+                        }
+                    }
+                }
+            }
         } else {
             player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
             return true;
         }
+        return false;
     }
 
     @Override
@@ -183,6 +215,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             suggestions.add("share");
             suggestions.add("list");
             suggestions.add("override");
+            suggestions.add("accept");
             if(player.isOp()){
                 suggestions.add("listall");
             }
@@ -199,15 +232,40 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                 suggestions.add(wp.getName());
             }
             return suggestions;
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {
+            List<String> suggestions = new ArrayList<>();
+            for (UUID p : WaypointManager.sharedWaypoints.get(player.getUniqueId()).keySet()) {
+                if (Bukkit.getPlayer(p) == null) continue;
+                suggestions.add(Bukkit.getPlayer(p).getName());
+            }
+            return suggestions;
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("accept")) {
+            List<String> suggestions = new ArrayList<>();
+            for (Waypoint wp : WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]).getUniqueId())) {
+                if(Bukkit.getPlayer(args[1]) == null) continue;
+                suggestions.add(wp.getName());
+            }
+            return suggestions;
+
         } else if (args.length == 3 && args[0].equalsIgnoreCase("share")){
             List<String> suggestions = new ArrayList<>();
             suggestions.add("everyone");
             suggestions.add("with");
             suggestions.add("faction");
             return suggestions;
+        } else if (args.length >= 4 && args[0].equalsIgnoreCase("share")) {
+            List<String> suggestions = new ArrayList<>();
+            if (args[2].equalsIgnoreCase("with")) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (p.getName().startsWith(args[3])) {
+                        suggestions.add(p.getName());
+                    }
+                }
+            }
         } else {
             // No suggestions for other arguments
             return null;
         }
+        return null;
     }
 }

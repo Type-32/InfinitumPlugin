@@ -1,5 +1,7 @@
 package cn.crtlprototypestudios.infinitumplugin.classes.factions;
 
+import cn.crtlprototypestudios.infinitumplugin.managers.LocalesManager;
+import org.bukkit.ChatColor;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
@@ -98,6 +100,8 @@ public class FactionSettings {
             case "maxModerators":
                 this.maxModerators = Integer.parseInt(value.toString());
                 break;
+            default:
+                throw new IllegalArgumentException(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.rules.invalid_key"));
         }
     }
     public static List<String> getRulesKey(){

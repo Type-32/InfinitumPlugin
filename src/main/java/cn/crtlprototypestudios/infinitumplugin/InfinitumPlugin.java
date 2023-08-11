@@ -2,6 +2,7 @@ package cn.crtlprototypestudios.infinitumplugin;
 
 import cn.crtlprototypestudios.infinitumplugin.commands.*;
 import cn.crtlprototypestudios.infinitumplugin.listeners.PlayerEventListener;
+import cn.crtlprototypestudios.infinitumplugin.managers.FactionsManager;
 import cn.crtlprototypestudios.infinitumplugin.managers.WaypointManager;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -42,6 +43,7 @@ public class InfinitumPlugin extends JavaPlugin {
         //getCommand("rules").setTabCompleter(rulesCommand);
 
         WaypointManager.readAllWaypoints(this);
+        FactionsManager.readFromFile();
     }
 
     @Override

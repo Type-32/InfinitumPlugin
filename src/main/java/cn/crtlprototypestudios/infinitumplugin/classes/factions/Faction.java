@@ -1,7 +1,11 @@
 package cn.crtlprototypestudios.infinitumplugin.classes.factions;
 
 import cn.crtlprototypestudios.infinitumplugin.classes.economy.EconomyVault;
+import cn.crtlprototypestudios.infinitumplugin.managers.FactionsManager;
+import cn.crtlprototypestudios.infinitumplugin.managers.LocalesManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
@@ -96,7 +100,7 @@ public class Faction {
     public String getPrefix(){
         return prefix;
     }
-    public void setSuffix(String suffix){
+    public void setSuffix(String suffix) {
         this.suffix = suffix;
     }
     public String getSuffix(){
@@ -132,6 +136,23 @@ public class Faction {
     public void removeMember(FactionPlayerInfo member){
         members.remove(member);
     }
+    public void removeMember(Player player, boolean fromAllMembers){
+        if(!fromAllMembers) {
+            for (FactionPlayerInfo member : members) {
+                if (member.getUsername().equals(player.getName())) {
+                    members.remove(member);
+                    break;
+                }
+            }
+        }else{
+            for (FactionPlayerInfo member : getAllMembers(false)) {
+                if (member.getUsername().equals(player.getName())) {
+                    members.remove(member);
+                    break;
+                }
+            }
+        }
+    }
     public void addAlliedFaction(Faction faction){
         alliedFactions.add(faction);
     }
@@ -160,5 +181,47 @@ public class Faction {
         jsonObject.put("vault", vault.toJSONObject());
         jsonObject.put("settings", factionSettings.toJSONObject());
         return jsonObject;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj instanceof Faction){
+            Faction faction = (Faction) obj;
+            if(faction.getLeader().equals(leader)) return true;
+        }
+        return false;
+    }
+
+    public void promoteMember(Player target) {
+        for(FactionPlayerInfo member : members){
+            if(member.getUsername().equals(target.getName())){
+                members.remove(member);
+                moderators.add(member);
+                break;
+            }
+        }
+    }
+
+    public void demoteMember(Player target) {
+        for(FactionPlayerInfo member : moderators){
+            if(member.getUsername().equals(target.getName())){
+                moderators.remove(member);
+                members.add(member);
+                break;
+            }
+        }
+    }
+
+    public void disband() {
+        if(FactionsManager.getFactions().contains(this)) FactionsManager.getFactions().remove(this);
+        else throw new IllegalArgumentException(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.disband.error"));
+    }
+
+    public Player[] getOnlinePlayers() {
+        ArrayList<Player> onlinePlayers = new ArrayList<Player>();
+        for(FactionPlayerInfo member : getAllMembers(false)){
+            if(Bukkit.getPlayer(member.getUUID()) != null) onlinePlayers.add(Bukkit.getPlayer(member.getUUID()));
+        }
+        return onlinePlayers.toArray(new Player[onlinePlayers.size()]);
     }
 }
