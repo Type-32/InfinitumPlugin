@@ -151,20 +151,7 @@ preventNull(player);
                 WaypointList waypointList = new WaypointList();
 
                 for (Object waypointObject : waypointsArray) {
-                    JSONObject waypointJson = (JSONObject) waypointObject;
-                    String name = (String) waypointJson.get("name");
-                    String worldName = (String) waypointJson.get("world");
-                    double x = (double) waypointJson.get("x");
-                    double y = (double) waypointJson.get("y");
-                    double z = (double) waypointJson.get("z");
-
-                    World world = Bukkit.getWorld(worldName);
-                    if (world == null) {
-                        plugin.getLogger().warning("World '" + worldName + "' for waypoint " + name + " not found. Skipping waypoint.");
-                        continue;
-                    }
-
-                    Waypoint waypoint = new Waypoint(name, world, x, y, z);
+                    Waypoint waypoint = new Waypoint((JSONObject) waypointObject);
                     waypointList.addWaypoint(waypoint);
                 }
 

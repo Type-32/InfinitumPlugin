@@ -236,4 +236,5 @@ public class Faction {
         }
         return onlinePlayers.toArray(new Player[onlinePlayers.size()]);
     }
+
 }

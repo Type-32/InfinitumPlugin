@@ -53,9 +53,9 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
          */
         TextComponent message = new TextComponent();
         message.addExtra(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.info.header"));
-        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.name") + (faction.getColor() + faction.getName()));
-        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.owner") + faction.getLeader().getPlayer().getName());
-        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.money") + faction.getVault().getMoney());
+        message.addExtra(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.info.name"),(faction.getColor() + faction.getName())));
+        message.addExtra(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.info.owner"),faction.getLeader().getPlayer().getName()));
+        message.addExtra(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.info.money"),faction.getVault().getMoney()));
         message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.moderators"));
         for(FactionPlayerInfo moderator : faction.getModerators()){
             message.addExtra(ChatColor.GRAY + "        -> " + moderator.getPlayer().getName());
@@ -171,30 +171,30 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         Player player = (Player) commandSender;
         if(!(commandSender instanceof Player)) {
-            commandSender.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.player_exclusive"));
+            commandSender.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.player_exclusive"));
             return true;
         }
 
         if((args.length <= 1 || args.length == 0) && !(args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("listall") || args[0].equalsIgnoreCase("info"))){
-            player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.factions.usage"));
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.usage"));
             return true;
         }
 
         if(args.length == 1){
             switch(args[0]){
                 case "create":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.factions.create.usage"));
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.create.usage"));
                     return true;
                 case "list":
                     if(FactionsManager.getFactions().isEmpty()){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.list.no_factions"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.list.no_factions"));
                         return true;
                     }
                     player.sendMessage(composeFactionsList(FactionsManager.getFactions(), false));
                     return true;
                 case "listall":
                     if(FactionsManager.getFactions().isEmpty()){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.list.no_factions"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.list.no_factions"));
                         return true;
                     }
                     player.sendMessage(composeFactionsList(FactionsManager.getFactions(), player.isOp()));
@@ -210,32 +210,71 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     return true;
                 case "leave":
                     if(!FactionsManager.findPlayerInFaction(player)){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.leave.not_in_faction"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.leave.not_in_faction"));
                         return true;
                     }
                     if(!FactionsManager.isPlayerLeader(player)) FactionsManager.leaveFaction(player);
-                    player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.leave.success"));
+                    player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.leave.success",FactionsManager.getPlayerFaction(player).getName()));
                     return true;
                 case "disband":
                     if(!FactionsManager.findPlayerInFaction(player)){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.disband.not_in_faction"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.disband.not_in_faction"));
                         return true;
                     }
                     if(!FactionsManager.isPlayerLeader(player)){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.disband.not_leader"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.disband.not_leader"));
                         return true;
                     }
                     if(FactionsManager.getPlayerFaction(player).getMembers() == null){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.disband.no_members"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.disband.no_members"));
                         return true;
                     }
                     for(FactionPlayerInfo p : FactionsManager.getPlayerFaction(player).getMembers()){
                         if(Bukkit.getPlayer(p.getUUID()) == null) continue;
-                        FactionsManager.getPlayer(p).sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.disband.disbanded"));
+                        FactionsManager.getPlayer(p).sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.disband.disbanded",FactionsManager.getPlayerFaction(player).getName()));
                     }
                     FactionsManager.disbandFaction(player);
-                    player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.disband.success"));
+                    player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.disband.success",FactionsManager.getPlayerFaction(player).getName()));
 
+                    return true;
+                case "rules":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.rules.usage"));
+                    return true;
+                case "invites":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.invites.usage"));
+                    return true;
+                case "join":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.join.usage"));
+                    return true;
+                case "kick":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.kick.usage"));
+                    return true;
+                case "promote":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.promote.usage"));
+                    return true;
+                case "demote":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.demote.usage"));
+                    return true;
+                case "invite":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.invite.usage"));
+                    return true;
+                case "prefix":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.prefix.usage"));
+                    return true;
+                case "suffix":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.suffix.usage"));
+                    return true;
+                case "color":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.color.usage"));
+                    return true;
+                case "ally":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.ally.usage"));
+                    return true;
+                case "enemy":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.enemy.usage"));
+                    return true;
+                case "neutral":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.neutral.usage"));
                     return true;
             }
         }
@@ -243,57 +282,57 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
         if(args.length == 2){
             if(args[0].equalsIgnoreCase("create")){
                 if(FactionsManager.findPlayerInFaction(player)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.create.already_in_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.create.already_in_faction"));
                     return true;
                 }
                 if(args[1].length() > 16){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.create.name_too_long"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.create.name_too_long"));
                     return true;
                 }
                 if(FactionsManager.factionExists(args[1])){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.create.name_already_exists"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.create.name_already_exists"));
                     return true;
                 }
                 FactionsManager.createFaction(player, args[1]);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.create.success"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getProp("msg.command.factions.create.success"));
                 return true;
             }
 
             if(args[0].equalsIgnoreCase("join")){
                 if(FactionsManager.findPlayerInFaction(player)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.join.already_in_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.join.already_in_faction"));
                     return true;
                 }
                 if(!FactionsManager.factionExists(args[1])){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.join.faction_not_exists"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.join.faction_not_exists"));
                     return true;
                 }
                 if(!FactionsManager.getFaction(args[1]).factionSettings.factionPublic){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.join.faction_not_public"));
+                    player.sendMessage(ChatColor.RED + (FactionsManager.getFaction(args[1]).factionSettings.factionPublic ? LocalesManager.Locales.getString("msg.command.factions.join.faction_not_public") : LocalesManager.Locales.getString("msg.command.factions.join.faction_not_public_hidden")));
                     return true;
                 }
                 try{
                     FactionsManager.joinFaction(player, args[1]);
                 } catch (Exception e){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.join.error"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.join.error"));
                     return true;
                 }
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.join.success"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.join.success", ChatColor.GOLD + args[1]));
                 return true;
             }
 
             if(args[0].equalsIgnoreCase("invite")){
                 Player target = Bukkit.getPlayer(args[1]);
                 if(target == null){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invite.nonexisting_player"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.invite.nonexisting_player",args[1]));
                     return true;
                 }
                 if((!FactionsManager.isPlayerLeader(player) && !FactionsManager.isPlayerModerator(player)) && !FactionsManager.getPlayerFaction(player).factionSettings.allowFreeJoin){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invite.not_leader_or_moderator"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invite.not_leader_or_moderator"));
                     return true;
                 }
                 if(FactionsManager.findPlayerInFaction(target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invite.player_already_in_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.invite.player_already_in_faction", target.getName()));
                     return true;
                 }
                 if(FactionsManager.factionInvites.get(target.getUniqueId()) == null || FactionsManager.factionInvites.get(target.getUniqueId()).isEmpty()){
@@ -302,97 +341,112 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 FactionsManager.factionInvites.get(target.getUniqueId()).add(new FactionInvite(player, FactionsManager.getPlayerFaction(player)));
             }
 
+            if(args[0].equalsIgnoreCase("invites")){
+                List<FactionInvite> inviters = FactionsManager.factionInvites.get(player);
+                if (args[0].equalsIgnoreCase("list")) {
+                    if (inviters == null || inviters.isEmpty()) {
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.no_invites"));
+                        return true;
+                    }
+                    player.sendMessage(createInviteMessage(inviters));
+                    return true;
+                } else {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.usage"));
+                    return true;
+                }
+            }
+
             if(args[0].equalsIgnoreCase("kick")){
                 Player target = Bukkit.getPlayer(args[1]);
                 if(target == null){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.kick.nonexisting_player"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.kick.nonexisting_player",args[1]));
                     return true;
                 }
                 if(target.getUniqueId() == player.getUniqueId()){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.kick.cannot_kick_self"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.kick.cannot_kick_self"));
                     return true;
                 }
                 if(!FactionsManager.findPlayerInFaction(target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.kick.player_not_in_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.kick.player_not_in_faction",target.getName()));
                     return true;
                 }
                 if(FactionsManager.isPlayerLeader(target) && FactionsManager.getPlayerFaction(target).equals(FactionsManager.getPlayerFaction(player))){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.kick.cannot_kick_leader"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.kick.cannot_kick_leader"));
                     return true;
                 }
                 FactionsManager.kickPlayerFromFaction(target);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.kick.success"));
-                if(target.isOnline()) target.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.kick.kicked"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.kick.success",target.getName()));
+                if(target.isOnline()) target.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.kick.kicked"));
                 return true;
             }
 
             if(args[0].equalsIgnoreCase("promote")){
                 Player target = Bukkit.getPlayer(args[1]);
                 if(target == null){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.nonexisting_player"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.promote.nonexisting_player",args[1]));
                     return true;
                 }
                 if(target.getUniqueId() == player.getUniqueId()){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.cannot_promote_self"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.promote.cannot_promote_self"));
                     return true;
                 }
                 if(!FactionsManager.findPlayerInFaction(target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.player_not_in_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.promote.player_not_in_faction",target.getName()));
                     return true;
                 }
                 if(FactionsManager.isPlayerLeader(target) && FactionsManager.isSameFaction(player, target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.cannot_promote_leader"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.promote.cannot_promote_leader"));
                     return true;
                 }
                 if(!FactionsManager.isSameFaction(player, target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.not_same_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.promote.not_same_faction",target.getName()));
                     return true;
                 }
                 if(FactionsManager.isPlayerModerator(target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.already_moderator"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.promote.already_moderator",target.getName()));
                     return true;
                 }
                 FactionsManager.promotePlayer(target);
                 player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.promote.success"));
-                if(target.isOnline()) target.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.promote.promoted"));
+                if(target.isOnline()) target.sendMessage(ChatColor.GREEN + String.format(LocalesManager.Locales.getString("msg.command.factions.promote.promoted"),FactionsManager.getPlayerFaction(target).getName()));
                 return true;
             }
 
             if(args[0].equalsIgnoreCase("demote")){
                 Player target = Bukkit.getPlayer(args[1]);
                 if(target == null){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.demote.nonexisting_player"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.demote.nonexisting_player", args[1]));
                     return true;
                 }
                 if(target.getUniqueId() == player.getUniqueId()){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.demote.cannot_demote_self"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.demote.cannot_demote_self"));
                     return true;
                 }
                 if(!FactionsManager.findPlayerInFaction(target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.demote.player_not_in_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.demote.player_not_in_faction", args[1]));
                     return true;
                 }
                 if(FactionsManager.isPlayerLeader(target) && FactionsManager.isSameFaction(player, target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.demote.cannot_demote_leader"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.demote.cannot_demote_leader"));
                     return true;
                 }
                 if(!FactionsManager.isSameFaction(player, target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.demote.not_same_faction"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.demote.not_same_faction", target.getName()));
                     return true;
                 }
                 if(!FactionsManager.isPlayerModerator(target)){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.demote.not_moderator"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.demote.not_moderator",target.getName()));
                     return true;
                 }
                 FactionsManager.demotePlayer(target);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.demote.success"));
-                if(target.isOnline()) target.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.demote.demoted"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.demote.success", target.getName()));
+                if(target.isOnline()) target.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.demote.demoted", FactionsManager.getPlayerFaction(target).getName()));
                 return true;
             }
 
             if (args[0].equalsIgnoreCase("prefix")){
                 if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.prefix.no_prefix"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.no_prefix"));
                     return true;
                 }
                 String prefix = "";
@@ -401,17 +455,17 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 }
                 prefix = prefix.substring(0, prefix.length() - 1);
                 if(prefix.length() > 16){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.prefix.prefix_too_long"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.prefix_too_long"));
                     return true;
                 }
                 FactionsManager.setFactionPrefix(player, prefix);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.prefix.success"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.prefix.success", prefix));
                 return true;
             }
 
             if (args[0].equalsIgnoreCase("suffix")){
                 if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.suffix.no_suffix"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.suffix.no_suffix"));
                     return true;
                 }
                 String suffix = "";
@@ -420,17 +474,17 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 }
                 suffix = suffix.substring(0, suffix.length() - 1);
                 if(suffix.length() > 16){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.suffix.suffix_too_long"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.suffix.suffix_too_long"));
                     return true;
                 }
                 FactionsManager.setFactionSuffix(player, suffix);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.suffix.success"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.suffix.success",suffix));
                 return true;
             }
 
             if(args[0].equalsIgnoreCase("color")){
                 if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.color.no_color"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.color.no_color"));
                     return true;
                 }
                 String color = args[1];
@@ -438,40 +492,152 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 try{
                     chatColor = ChatColor.valueOf(color);
                 }catch (Exception e){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.color.invalid_color"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.color.invalid_color"));
                     return true;
                 }
                 if(chatColor == null){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.color.invalid_color"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.color.invalid_color"));
                     return true;
                 }
                 FactionsManager.setFactionColor(player, color);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.color.success"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.color.success", chatColor + color));
                 return true;
+            }
+
+            if(args[0].equalsIgnoreCase("ally")){
+                if (args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.ally.no_faction"));
+                    return true;
+                }
+                if (!FactionsManager.factionExists(args[1])) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.ally.invalid_faction", args[1]));
+                    return true;
+                }
+                if (!FactionsManager.findPlayerInFaction(player)) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.ally.not_in_faction"));
+                    return true;
+                }
+                if (FactionsManager.isSameFaction(player, FactionsManager.getFaction(args[1]))) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.ally.cannot_ally_self"));
+                    return true;
+                }
+                if (FactionsManager.getPlayerFaction(player).getAlliedFactions().contains(FactionsManager.getFaction(args[1]))) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.ally.already_allied", FactionsManager.getFaction(args[1]).getName()));
+                    return true;
+                }
+                if (FactionsManager.getPlayerFaction(player).getEnemyFactions().contains(FactionsManager.getFaction(args[1]))) {
+                    FactionsManager.unenemyFactions(player, FactionsManager.getFaction(args[1]));
+                }
+                FactionsManager.allyFactions(player, FactionsManager.getFaction(args[1]));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.ally.success", FactionsManager.getFaction(args[1]).getName()));
+                if(Bukkit.getPlayer(FactionsManager.getFaction(args[1]).getLeader().getUUID()) != null){
+                    Bukkit.getPlayer(FactionsManager.getFaction(args[1]).getLeader().getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.ally.ally", FactionsManager.getPlayerFaction(player).getName()));
+                }
+                if(FactionsManager.getFaction(args[1]).getModerators() != null){
+                    for(FactionPlayerInfo member : FactionsManager.getFaction(args[1]).getModerators()){
+                        if(Bukkit.getPlayer(member.getUUID()) != null){
+                            Bukkit.getPlayer(member.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.ally.ally", FactionsManager.getPlayerFaction(player).getName()));
+                        }
+                    }
+                }
+                return true;
+            }
+
+            if(args[0].equalsIgnoreCase("enemy")){
+                if (args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.enemy.no_faction"));
+                    return true;
+                }
+                if (!FactionsManager.factionExists(args[1])) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.enemy.invalid_faction"));
+                    return true;
+                }
+                if (!FactionsManager.findPlayerInFaction(player)) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.enemy.not_in_faction"));
+                    return true;
+                }
+                if (FactionsManager.isSameFaction(player, FactionsManager.getFaction(args[1]))) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.enemy.cannot_enemy_self"));
+                    return true;
+                }
+                if (FactionsManager.getPlayerFaction(player).getAlliedFactions().contains(FactionsManager.getFaction(args[1]))) {
+                    FactionsManager.unallyFactions(player, FactionsManager.getFaction(args[1]));
+                }
+                if (FactionsManager.getPlayerFaction(player).getEnemyFactions().contains(FactionsManager.getFaction(args[1]))) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.enemy.already_enemy"));
+                    return true;
+                }
+                FactionsManager.enemyFactions(player, FactionsManager.getFaction(args[1]));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.enemy.success", FactionsManager.getFaction(args[1]).getName()));
+                if(Bukkit.getPlayer(FactionsManager.getFaction(args[1]).getLeader().getUUID()) != null){
+                    Bukkit.getPlayer(FactionsManager.getFaction(args[1]).getLeader().getUUID()).sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.enemy.enemy", FactionsManager.getPlayerFaction(player).getName()));
+                }
+                if(FactionsManager.getFaction(args[1]).getModerators() != null) {
+                    for (FactionPlayerInfo member : FactionsManager.getFaction(args[1]).getModerators()) {
+                        if (Bukkit.getPlayer(member.getUUID()) != null) {
+                            Bukkit.getPlayer(member.getUUID()).sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.enemy.enemy", FactionsManager.getPlayerFaction(player).getName()));
+                        }
+                    }
+                }
+            }
+
+            if(args[0].equalsIgnoreCase("neutral")){
+                if (args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.neutral.no_faction"));
+                    return true;
+                }
+                if (!FactionsManager.factionExists(args[1])) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.neutral.invalid_faction"));
+                    return true;
+                }
+                if (!FactionsManager.findPlayerInFaction(player)) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.neutral.not_in_faction"));
+                    return true;
+                }
+                if (FactionsManager.isSameFaction(player, FactionsManager.getFaction(args[1]))) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.neutral.cannot_neutral_self"));
+                    return true;
+                }
+                if (!FactionsManager.getPlayerFaction(player).getAlliedFactions().contains(FactionsManager.getFaction(args[1])) && !FactionsManager.getPlayerFaction(player).getEnemyFactions().contains(FactionsManager.getFaction(args[1]))) {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.neutral.not_enemy_or_ally"));
+                    return true;
+                }
+                FactionsManager.unallyFactions(player, FactionsManager.getFaction(args[1]));
+                FactionsManager.unenemyFactions(player, FactionsManager.getFaction(args[1]));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.neutral.success", FactionsManager.getFaction(args[1]).getName()));
+                if(Bukkit.getPlayer(FactionsManager.getFaction(args[1]).getLeader().getUUID()) != null){
+                    Bukkit.getPlayer(FactionsManager.getFaction(args[1]).getLeader().getUUID()).sendMessage(ChatColor.YELLOW + LocalesManager.getPropFormatted("msg.command.factions.neutral.neutral", FactionsManager.getPlayerFaction(player).getName()));
+                }
+                if(FactionsManager.getFaction(args[1]).getModerators() != null) {
+                    for (FactionPlayerInfo member : FactionsManager.getFaction(args[1]).getModerators()) {
+                        if (Bukkit.getPlayer(member.getUUID()) != null) {
+                            Bukkit.getPlayer(member.getUUID()).sendMessage(ChatColor.YELLOW + LocalesManager.getPropFormatted("msg.command.factions.neutral.neutral", FactionsManager.getPlayerFaction(player).getName()));
+                        }
+                    }
+                }
             }
         }
         if(args.length == 3){
+
             if(args[0].equalsIgnoreCase("rules")){
                 if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.rules.no_rules"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.rules.no_rules"));
                     return true;
                 }
-                String rules = "";
-                for(int i = 1; i < args.length; i++){
-                    rules += args[i] + " ";
-                }
-                rules = rules.substring(0, rules.length() - 1);
-                if(rules.length() > 100){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.rules.rules_too_long"));
+                String rule = args[1];
+                if(rule.length() > 100){
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.rules.rules_too_long"));
                     return true;
                 }
+                String value = "java.lang.IllegalArgumentException";
                 try {
-                    FactionsManager.setFactionRules(player, rules, args[2]);
+                    value = FactionsManager.getFactionRuleValue(player, rule);
+                    FactionsManager.setFactionRules(player, rule, args[2]);
                 } catch (Exception e){
-                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.rules.invalid_key_or_value"));
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.rules.invalid_key_or_value"));
                     return true;
                 }
-                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.rules.success"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.rules.success",rule, args[2], value));
                 return true;
             }
 
@@ -480,16 +646,16 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
 
                 if(args[1].equalsIgnoreCase("accept")){
                     if(inviters == null || inviters.isEmpty()){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_invites"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.no_invites"));
                         return true;
                     }
                     if(args.length == 2 || args[2].isEmpty() || args[2].equalsIgnoreCase("")){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_faction"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.no_faction"));
                         return true;
                     }
                     Faction invitingFaction = FactionsManager.getFaction(args[2]);
                     if(invitingFaction == null){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.invalid_faction"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.factions.invites.invalid_faction", args[2]));
                         FactionsManager.factionInvites.get(player).clear();
                         return true;
                     }
@@ -497,19 +663,12 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         if(i.faction.equals(invitingFaction) || invitingFaction.getAllMembers(false).contains(i.sender)){
                             try{
                                 FactionsManager.joinFaction(player, invitingFaction.getName());
-                                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.accepted"));
-                                if(Bukkit.getPlayer(i.sender.getUUID()) == null){
-                                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_offline"));
-                                }else{
-                                    Bukkit.getPlayer(i.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_accepted"));
+                                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.invites.accepted", invitingFaction.getName()));
+                                if(Bukkit.getPlayer(i.sender.getUUID()) != null){
+                                    Bukkit.getPlayer(i.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.invites.inviter_accepted", player.getName()));
                                 }
                             } catch (Exception e){
-                                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_invalid_faction"));
-                            }
-                            if(!FactionsManager.factionInvites.get(player.getUniqueId()).isEmpty()){
-                                for(FactionInvite inv : FactionsManager.factionInvites.get(player.getUniqueId())){
-                                    Bukkit.getPlayer(inv.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_denied"));
-                                }
+                                player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.inviter_invalid_faction"));
                             }
                             FactionsManager.factionInvites.get(player.getUniqueId()).clear();
                             return true;
@@ -518,41 +677,35 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
 
                 } else if (args[1].equalsIgnoreCase("deny")){
                     if(inviters == null || inviters.isEmpty()){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_invites"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.no_invites"));
                         return true;
                     }
                     if(args.length == 2 || args[2].isEmpty() || args[2].equalsIgnoreCase("")){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_faction"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.no_faction"));
                         return true;
                     }
                     Faction invitingFaction = FactionsManager.getFaction(args[2]);
                     if(invitingFaction == null){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.invalid_faction"));
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.invalid_faction"));
                         FactionsManager.factionInvites.get(player).clear();
                         return true;
                     }
                     for(FactionInvite i : inviters){
                         if(i.faction.equals(invitingFaction) || invitingFaction.getAllMembers(false).contains(i.sender)){
                             try{
-                                player.sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.denied"));
-                                if(Bukkit.getPlayer(i.sender.getUUID()) == null){
-                                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_offline"));
-                                }else{
-                                    Bukkit.getPlayer(i.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_denied"));
+                                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.invites.denied", invitingFaction.getName()));
+                                if(Bukkit.getPlayer(i.sender.getUUID()) != null){
+                                    Bukkit.getPlayer(i.sender.getUUID()).sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.invites.inviter_denied", player.getName()));
                                 }
                             } catch (Exception e){
-                                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.inviter_invalid_faction"));
+                                player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.inviter_invalid_faction"));
                             }
                             FactionsManager.factionInvites.get(player.getUniqueId()).remove(i);
                             return true;
                         }
                     }
-                } else if (args[0].equalsIgnoreCase("list")) {
-                    if (inviters == null || inviters.isEmpty()) {
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_invites"));
-                        return true;
-                    }
-                    player.sendMessage(createInviteMessage(inviters));
+                } else {
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.usage_list"));
                     return true;
                 }
             }
@@ -566,7 +719,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 1) {
             // Provide suggestions for the first argument ("/waypoint <arg>")
-            if(!FactionsManager.findPlayerInFaction(player)) {
+            if(!FactionsManager.findPlayerInFaction(player) || FactionsManager.isFactionNull(player)){
                 suggestions.add("create");
                 suggestions.add("join");
             }else{
@@ -582,6 +735,8 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     suggestions.add("prefix");
                     suggestions.add("suffix");
                     suggestions.add("color");
+                    suggestions.add("ally");
+                    suggestions.add("enemy");
                 }
                 suggestions.add("info");
                 suggestions.add("leave");
@@ -596,18 +751,23 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
         } else if (args.length == 2) {
             if(args[0].equalsIgnoreCase("promote")) {
                 Faction f = FactionsManager.getPlayerFaction(player);
+                if(FactionsManager.isFactionNull(f)) return null;
+                if(f == null) return null;
                 for (FactionPlayerInfo p : f.getMembers()) {
                     suggestions.add(p.getUsername());
                 }
                 return suggestions;
             }else if (args[0].equalsIgnoreCase("demote")){
                 Faction f = FactionsManager.getPlayerFaction(player);
+                if(FactionsManager.isFactionNull(f)) return null;
+                if(f == null) return null;
                 for (FactionPlayerInfo p : f.getModerators()) {
                     suggestions.add(p.getUsername());
                 }
                 return suggestions;
             }else if (args[0].equalsIgnoreCase("kick")){
                 FactionPlayerInfo f = FactionsManager.getPlayerInFaction(player);
+                if(FactionsManager.isFactionNull(player)) return null;
                 if(f.isModerator()){
                     Faction faction = FactionsManager.getPlayerFaction(player);
                     for (FactionPlayerInfo p : faction.getMembers()) {
@@ -632,24 +792,49 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 return suggestions;
             }else if (args[0].equalsIgnoreCase("invite")) {
                 Faction faction = FactionsManager.getPlayerFaction(player);
+                if(FactionsManager.isFactionNull(faction)) return null;
                 for (Player p : player.getServer().getOnlinePlayers()) {
                     if(!FactionsManager.isPlayerLeader(p)) suggestions.add(p.getName());
                 }
                 return suggestions;
             }else if (args[0].equalsIgnoreCase("join")) {
+                if(FactionsManager.isFactionNull(player)) return null;
                 for (Faction f : FactionsManager.getFactions()) {
                     if(f.factionSettings.factionPublic) suggestions.add(f.getName());
                 }
                 return suggestions;
             }else if (args[0].equalsIgnoreCase("rules")){
+                if(FactionsManager.isFactionNull(player)) return null;
                 if(FactionsManager.isPlayerLeader(player)){
                     suggestions.addAll(FactionSettings.getRulesKey());
                 }
             }else if (args[0].equalsIgnoreCase("invites")){
+                Faction faction = FactionsManager.getPlayerFaction(player);
+                if(FactionsManager.isFactionNull(faction)) return null;
                 if(FactionsManager.findPlayerInFaction(player)){
                     suggestions.add("accept");
                     suggestions.add("deny");
                     suggestions.add("list");
+                }
+            }else if (args[0].equalsIgnoreCase("ally")){
+                Faction faction = FactionsManager.getPlayerFaction(player);
+                if(FactionsManager.isFactionNull(faction)) return null;
+                if(FactionsManager.isPlayerLeader(player) && faction != null){
+                    for(Faction f : FactionsManager.getFactions()){
+                        if(!f.equals(faction) && !faction.getAlliedFactions().contains(f)){
+                            suggestions.add(f.getName());
+                        }
+                    }
+                }
+            }else if (args[0].equalsIgnoreCase("enemy")){
+                Faction faction = FactionsManager.getPlayerFaction(player);
+                if(FactionsManager.isFactionNull(faction)) return null;
+                if(FactionsManager.isPlayerLeader(player) && faction != null){
+                    for(Faction f : FactionsManager.getFactions()){
+                        if(!f.equals(faction) && !faction.getEnemyFactions().contains(f)){
+                            suggestions.add(f.getName());
+                        }
+                    }
                 }
             }
         } else if (args.length == 3){

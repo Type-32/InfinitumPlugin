@@ -16,6 +16,8 @@ commands:
     description: Return to your previous location before last teleport
   waypoint:
     description: Waypoint System
+  factions:
+    description: Factions System
 
 permissions:
   teleport.tpa:

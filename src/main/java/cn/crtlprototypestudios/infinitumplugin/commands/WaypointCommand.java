@@ -213,7 +213,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                 boolean flag = false;
                 for(Waypoint wp : WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]))){
                     if(WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]) != null && WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]).equals(wp)){
-                        WaypointManager.addWaypoint(player, wp);
+                        WaypointManager.addWaypoint(player, new Waypoint(wp, true));
                         flag = true;
                         break;
                     }

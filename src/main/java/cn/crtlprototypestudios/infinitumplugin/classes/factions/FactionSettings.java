@@ -119,4 +119,31 @@ public class FactionSettings {
         keys.add("maxModerators");
         return keys;
     }
+
+    public Object getSettingsValue(String rule) {
+        switch(rule){
+            case "membersPublic":
+                return this.membersPublic;
+            case "moderatorsPublic":
+                return this.moderatorsPublic;
+            case "leadersPublic":
+                return this.leadersPublic;
+            case "alliedFactionsPublic":
+                return this.alliedFactionsPublic;
+            case "enemyFactionsPublic":
+                return this.enemyFactionsPublic;
+            case "factionPublic":
+                return this.factionPublic;
+            case "allowFreeJoin":
+                return this.allowFreeJoin;
+            case "allowFreeLeave":
+                return this.allowFreeLeave;
+            case "maxMembers":
+                return this.maxMembers;
+            case "maxModerators":
+                return this.maxModerators;
+            default:
+                throw new IllegalArgumentException(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.rules.invalid_key_or_value"));
+        }
+    }
 }

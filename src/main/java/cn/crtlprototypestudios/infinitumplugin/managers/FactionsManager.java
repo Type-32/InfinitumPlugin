@@ -22,6 +22,12 @@ import java.util.List;
 import java.util.UUID;
 
 public class FactionsManager {
+    /**
+     * This class is responsible for managing factions.
+     * It stores a list of factions, and provides methods for creating, deleting, and modifying factions.
+     * It also provides methods for getting a player's faction, and checking if a player is in a faction.
+     */
+
     private static List<Faction> factions = new ArrayList<>();
     public static HashMap<UUID, List<FactionInvite>> factionInvites = new HashMap<>();
 
@@ -78,6 +84,17 @@ public class FactionsManager {
         }
         return false;
     }
+    public static String getFactionRuleValue(Player player, String rule){
+        if(factions.isEmpty()) return null;
+        for (Faction faction : factions) {
+            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
+                if (playerInfo.getUsername().equals(player.getName())) {
+                    return faction.factionSettings.getSettingsValue(rule).toString();
+                }
+            }
+        }
+        return null;
+    }
     public static FactionPlayerInfo getPlayerInFaction(Player player){
         if(factions.isEmpty()) return null;
         for (Faction faction : factions) {
@@ -102,6 +119,20 @@ public class FactionsManager {
             }
         }
         return false;
+    }
+    public static boolean isFactionNull(Player player){
+        if(factions.isEmpty()) return true;
+        for (Faction faction : factions) {
+            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
+                if (playerInfo.getUsername().equals(player.getName())) {
+                    return faction == null;
+                }
+            }
+        }
+        return true;
+    }
+    public static boolean isFactionNull(Faction faction){
+        return faction == null;
     }
     public static boolean isPlayerModerator(Player player){
         if(factions.isEmpty()) return false;
@@ -279,6 +310,16 @@ public class FactionsManager {
         return getPlayerFaction(player1).equals(getPlayerFaction(player2));
     }
 
+    public static boolean isSameFaction(Player player, Faction faction){
+        if(!findPlayerInFaction(player)) return false;
+        return getPlayerFaction(player).equals(faction);
+    }
+
+    public static boolean isSameFaction(Faction faction, Player player){
+        if(!findPlayerInFaction(player)) return false;
+        return getPlayerFaction(player).equals(faction);
+    }
+
     public static boolean isSameFaction(Faction faction1, Faction faction2){
         return faction1.equals(faction2);
     }
@@ -349,5 +390,30 @@ public class FactionsManager {
             id = UUID.randomUUID().toString() + RandomStringUtils.randomAlphanumeric(5);
         }
         return id;
+    }
+
+    public static void allyFactions(Player player, Faction faction) {
+        Faction playerFaction = getPlayerFaction(player);
+        if (playerFaction != null) {
+            playerFaction.addAlliedFaction(faction);
+        }
+    }
+    public static void unallyFactions(Player player, Faction faction){
+        Faction playerFaction = getPlayerFaction(player);
+        if (playerFaction != null) {
+            playerFaction.removeAlliedFaction(faction);
+        }
+    }
+    public static void enemyFactions(Player player, Faction faction){
+        Faction playerFaction = getPlayerFaction(player);
+        if (playerFaction != null) {
+            playerFaction.addEnemyFaction(faction);
+        }
+    }
+    public static void unenemyFactions(Player player, Faction faction){
+        Faction playerFaction = getPlayerFaction(player);
+        if (playerFaction != null) {
+            playerFaction.removeEnemyFaction(faction);
+        }
     }
 }
