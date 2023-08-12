@@ -179,6 +179,7 @@ public class FactionsManager {
     public static void createFaction(Player player, String factionName) {
         Faction faction = new Faction(factionName, new FactionPlayerInfo(player), ChatColor.WHITE);
         factions.add(faction);
+        writeToFile();
     }
 
     public static Faction getFaction(String factionName) {
@@ -194,6 +195,7 @@ public class FactionsManager {
         Faction faction = getFaction(factionName);
         if (faction != null) {
             faction.addMember(new FactionPlayerInfo(player));
+            writeToFile();
         }
         throw new IllegalArgumentException("Faction does not exist");
     }
@@ -202,6 +204,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(player);
         if (faction != null) {
             faction.removeMember(player, true);
+            writeToFile();
         }
     }
 
@@ -209,6 +212,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(target);
         if (faction != null) {
             faction.removeMember(target, false);
+            writeToFile();
         }
     }
 
@@ -216,6 +220,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(target);
         if (faction != null) {
             faction.promoteMember(target);
+            writeToFile();
         }
     }
 
@@ -223,6 +228,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(target);
         if (faction != null) {
             faction.demoteMember(target);
+            writeToFile();
         }
     }
     public static boolean isSameFaction(Player player1, Player player2){
@@ -239,6 +245,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(player);
         if (faction != null) {
             faction.disband();
+            writeToFile();
         }
     }
 
@@ -247,6 +254,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setPrefix(prefix);
             updatePlayerNicknames();
+            writeToFile();
         }
 
     }
@@ -255,6 +263,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setSuffix(suffix);
             updatePlayerNicknames();
+            writeToFile();
         }
     }
     public static void updatePlayerNicknames(){
@@ -271,6 +280,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setColor(ChatColor.valueOf(color));
             updatePlayerNicknames();
+            writeToFile();
         }
     }
     public static void setFactionPrefixColor(Player player, String color){
@@ -278,6 +288,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setPrefixColor(ChatColor.valueOf(color));
             updatePlayerNicknames();
+            writeToFile();
         }
     }
     public static void setFactionSuffixColor(Player player, String color){
@@ -285,6 +296,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setSuffixColor(ChatColor.valueOf(color));
             updatePlayerNicknames();
+            writeToFile();
         }
     }
 
@@ -292,6 +304,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(player);
         if (faction != null) {
             faction.factionSettings.setSettingsValue(rules,value);
+            writeToFile();
         }
     }
 
@@ -307,24 +320,28 @@ public class FactionsManager {
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.addAlliedFaction(faction);
+            writeToFile();
         }
     }
     public static void unallyFactions(Player player, Faction faction){
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.removeAlliedFaction(faction);
+            writeToFile();
         }
     }
     public static void enemyFactions(Player player, Faction faction){
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.addEnemyFaction(faction);
+            writeToFile();
         }
     }
     public static void unenemyFactions(Player player, Faction faction){
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.removeEnemyFaction(faction);
+            writeToFile();
         }
     }
 }
