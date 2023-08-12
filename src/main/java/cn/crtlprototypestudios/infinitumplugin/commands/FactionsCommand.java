@@ -163,7 +163,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.info.not_in_faction"));
                         return true;
                     }
-                    Faction faction = FactionsManager.getPlayerInFaction(player).getFaction();
+                    Faction faction = FactionsManager.getPlayerFaction(player);
 
                     composeListMessage(faction,player);
                     return true;

@@ -14,17 +14,11 @@ public class FactionPlayerInfo {
     private boolean isLeader = false;
     private boolean isModerator = false;
     private boolean isMember = false;
-    private Faction faction = null;
     private ArrayList<Faction> alliedFactions = new ArrayList<Faction>();
     private ArrayList<Faction> enemyFactions = new ArrayList<Faction>();
     public FactionPlayerInfo(Player player){
         this.username = player.getName();
         this.uuid = player.getUniqueId();
-    }
-    public FactionPlayerInfo(Player player, Faction faction){
-        this.username = player.getName();
-        this.uuid = player.getUniqueId();
-        this.faction = faction;
     }
     public Player getPlayer(){
         return (Player) Bukkit.getPlayer(uuid);
@@ -48,15 +42,6 @@ public class FactionPlayerInfo {
     }
     public String getUsername(){
         return username;
-    }
-    public void setFaction(Faction faction){
-        this.faction = faction;
-    }
-    public Faction getFaction(){
-        return faction;
-    }
-    public boolean hasFaction(){
-        return faction != null;
     }
     public void setLeader(boolean isLeader){
         this.isLeader = isLeader;
@@ -114,7 +99,6 @@ public class FactionPlayerInfo {
         jsonObject.put("isLeader", isLeader);
         jsonObject.put("isModerator", isModerator);
         jsonObject.put("isMember", isMember);
-        jsonObject.put("faction", faction.toJSONObject());
         return jsonObject;
     }
 
