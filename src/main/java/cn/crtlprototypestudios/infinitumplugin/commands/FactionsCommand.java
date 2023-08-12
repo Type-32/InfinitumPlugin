@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FactionsCommand implements CommandExecutor, TabCompleter {
-    public TextComponent composeListMessage(Faction faction){
+    public void composeListMessage(Faction faction, Player player){
         /*
         Faction Information:
             - Name: <faction name>
@@ -51,30 +51,28 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 ...
                 -> <faction enemy n>
          */
-        TextComponent message = new TextComponent();
-        message.addExtra(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.info.header"));
-        message.addExtra(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.info.name"),(faction.getColor() + faction.getName())));
-        message.addExtra(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.info.owner"),faction.getLeader().getPlayer().getName()));
-        message.addExtra(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.info.money"),faction.getVault().getMoney()));
-        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.moderators"));
+        player.sendMessage(ChatColor.GOLD + LocalesManager.getProp("msg.command.factions.info.header"));
+        player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.info.name",faction.getColor() + faction.getName()));
+        player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.info.owner", ChatColor.BLUE + faction.getLeader().getPlayer().getName()));
+        player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.info.money", ChatColor.BLUE + String.valueOf(faction.getVault().getMoney())));
+        player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.info.moderators"));
         for(FactionPlayerInfo moderator : faction.getModerators()){
-            message.addExtra(ChatColor.GRAY + "        -> " + moderator.getPlayer().getName());
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.BLUE + moderator.getPlayer().getName());
         }
-        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.members"));
+        player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.info.members"));
         for(FactionPlayerInfo member : faction.getMembers()){
-            message.addExtra(ChatColor.GRAY + "        -> " + member.getPlayer().getName());
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.BLUE + member.getPlayer().getName());
         }
-        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.allied"));
+        player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.info.allied"));
         for(Faction allied : faction.getAlliedFactions()){
-            message.addExtra(ChatColor.GRAY + "        -> " + allied.getName());
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.BLUE + allied.getName());
         }
-        message.addExtra(ChatColor.GRAY + "    - " + LocalesManager.Locales.getString("msg.command.factions.info.enemies"));
+        player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.info.enemies"));
         for(Faction enemy : faction.getEnemyFactions()){
-            message.addExtra(ChatColor.GRAY + "        -> " + enemy.getName());
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.BLUE + enemy.getName());
         }
-        return message;
     }
-    public TextComponent composeFactionsList(List<Faction> factions, boolean isPlayerOp){
+    public void composeFactionsList(List<Faction> factions, Player player){
         /*
         Factions List:
             - <faction 1>
@@ -82,60 +80,17 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             ...
             - <faction n>
          */
+        boolean isPlayerOp = player.isOp();
         TextComponent message = new TextComponent();
-        message.addExtra(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.list.header"));
+        player.sendMessage(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.list.header"));
         for(Faction faction : factions){
-
-            //Faction Member Number and HoverEvent Member List
-            TextComponent factionMemberNumber = new TextComponent();
-            String memberList = "";
-            for(FactionPlayerInfo member : faction.getMembers()){
-                memberList += ((faction.factionSettings.membersPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + member.getUsername()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
-            }
-            factionMemberNumber.setText((faction.factionSettings.membersPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getMembers().size()));
-            factionMemberNumber.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(memberList)));
-
-            //Faction Moderator Number and HoverEvent Moderator List
-            TextComponent factionModeratorNumber = new TextComponent();
-            String moderatorList = "";
-            for(FactionPlayerInfo moderator : faction.getModerators()){
-                moderatorList += ((faction.factionSettings.moderatorsPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + moderator.getUsername()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
-            }
-            factionModeratorNumber.setText((faction.factionSettings.moderatorsPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getModerators().size()));
-            factionModeratorNumber.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(moderatorList)));
-
-            //Faction Leader and HoverEvent Leader
-            TextComponent factionLeader = new TextComponent();
-            factionLeader.setText((faction.factionSettings.leadersPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + faction.getLeader().getPlayer().getName());
-
-            //Faction Allies and HoverEvent Allies
-            TextComponent factionAllies = new TextComponent();
-            String alliesList = "";
-            for(Faction allied : faction.getAlliedFactions()){
-                alliesList += ((faction.factionSettings.alliedFactionsPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + allied.getName()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
-            }
-            factionAllies.setText((faction.factionSettings.alliedFactionsPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getAlliedFactions().size()));
-            factionAllies.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(alliesList)));
-
-            //Faction Enemies and HoverEvent Enemies
-            TextComponent factionEnemies = new TextComponent();
-            String enemiesList = "";
-            for(Faction enemy : faction.getEnemyFactions()){
-                enemiesList += ((faction.factionSettings.enemyFactionsPublic || isPlayerOp ? ChatColor.AQUA : ChatColor.MAGIC) + enemy.getName()) + ChatColor.RESET + (ChatColor.GREEN + ", ");
-            }
-            factionEnemies.setText((faction.factionSettings.enemyFactionsPublic || isPlayerOp ? ChatColor.GREEN : ChatColor.MAGIC) + String.valueOf(faction.getEnemyFactions().size()));
-            factionEnemies.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(enemiesList)));
-
-            message.addExtra(ChatColor.GRAY + "    - " + ((faction.factionSettings.factionPublic || isPlayerOp ? faction.getColor() : ChatColor.MAGIC) + faction.getName()));
-            if(faction.factionSettings.factionPublic || isPlayerOp){
-                message.addExtra((ChatColor.GRAY) + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.owner") + factionLeader);
-                message.addExtra((ChatColor.GRAY) + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.moderators") + factionModeratorNumber);
-                message.addExtra(ChatColor.GRAY + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.members") + factionMemberNumber);
-                message.addExtra(ChatColor.GRAY + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.allied") + factionAllies);
-                message.addExtra(ChatColor.GRAY + "        -> " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.list.enemies") + factionEnemies);
-            }
+            player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.YELLOW + LocalesManager.getPropFormatted("msg.command.factions.list.name",faction.getColor() + faction.getName()));
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.owner",((faction.factionSettings.leadersPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + faction.getLeader().getPlayer().getName()))));
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.moderators",((faction.factionSettings.moderatorsPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + String.valueOf(faction.getModerators().size())))));
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.members",((faction.factionSettings.moderatorsPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + String.valueOf(faction.getMembers().size())))));
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.allied",((faction.factionSettings.alliedFactionsPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + String.valueOf(faction.getAlliedFactions().size())))));
+            player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.enemies",((faction.factionSettings.enemyFactionsPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + String.valueOf(faction.getEnemyFactions().size())))));
         }
-        return message;
     }
     public TextComponent createInviteMessage(List<FactionInvite> factionInvite){
         /*
@@ -190,14 +145,18 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.list.no_factions"));
                         return true;
                     }
-                    player.sendMessage(composeFactionsList(FactionsManager.getFactions(), false));
+                    composeFactionsList(FactionsManager.getFactions(), player);
                     return true;
                 case "listall":
-                    if(FactionsManager.getFactions().isEmpty()){
-                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.list.no_factions"));
+                    if(!player.isOp()){
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.listall.no_permission"));
                         return true;
                     }
-                    player.sendMessage(composeFactionsList(FactionsManager.getFactions(), player.isOp()));
+                    if(FactionsManager.getFactions().isEmpty()){
+                        player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.listall.no_factions"));
+                        return true;
+                    }
+                    composeFactionsList(FactionsManager.getFactions(), player);
                     return true;
                 case "info":
                     if(!FactionsManager.findPlayerInFaction(player)){
@@ -206,7 +165,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     }
                     Faction faction = FactionsManager.getPlayerInFaction(player).getFaction();
 
-                    player.sendMessage(composeListMessage(faction));
+                    composeListMessage(faction,player);
                     return true;
                 case "leave":
                     if(!FactionsManager.findPlayerInFaction(player)){
@@ -719,7 +678,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 1) {
             // Provide suggestions for the first argument ("/waypoint <arg>")
-            if(!FactionsManager.findPlayerInFaction(player) || FactionsManager.isFactionNull(player)){
+            if(!FactionsManager.findPlayerInFaction(player)){
                 suggestions.add("create");
                 suggestions.add("join");
             }else{
@@ -752,7 +711,6 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             if(args[0].equalsIgnoreCase("promote")) {
                 Faction f = FactionsManager.getPlayerFaction(player);
                 if(FactionsManager.isFactionNull(f)) return null;
-                if(f == null) return null;
                 for (FactionPlayerInfo p : f.getMembers()) {
                     suggestions.add(p.getUsername());
                 }
@@ -760,7 +718,6 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             }else if (args[0].equalsIgnoreCase("demote")){
                 Faction f = FactionsManager.getPlayerFaction(player);
                 if(FactionsManager.isFactionNull(f)) return null;
-                if(f == null) return null;
                 for (FactionPlayerInfo p : f.getModerators()) {
                     suggestions.add(p.getUsername());
                 }
