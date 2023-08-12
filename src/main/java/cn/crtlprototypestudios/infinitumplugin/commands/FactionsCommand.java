@@ -239,6 +239,11 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
         }
 
         if(args.length == 2){
+            if(args[0].equalsIgnoreCase("prefix") || args[0].equalsIgnoreCase("suffix")){
+                player.sendMessage(ChatColor.GRAY + LocalesManager.getProp(args[0].equalsIgnoreCase("prefix") ? "msg.command.factions.prefix.usage" : "msg.command.factions.suffix.usage"));
+                return true;
+            }
+
             if(args[0].equalsIgnoreCase("create")){
                 if(FactionsManager.findPlayerInFaction(player)){
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.create.already_in_faction"));
@@ -403,44 +408,6 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            if (args[0].equalsIgnoreCase("prefix")){
-                if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
-                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.no_prefix"));
-                    return true;
-                }
-                String prefix = "";
-                for(int i = 1; i < args.length; i++){
-                    prefix += args[i] + " ";
-                }
-                prefix = prefix.substring(0, prefix.length() - 1);
-                if(prefix.length() > 16){
-                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.prefix_too_long"));
-                    return true;
-                }
-                FactionsManager.setFactionPrefix(player, prefix);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.prefix.success", prefix));
-                return true;
-            }
-
-            if (args[0].equalsIgnoreCase("suffix")){
-                if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
-                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.suffix.no_suffix"));
-                    return true;
-                }
-                String suffix = "";
-                for(int i = 1; i < args.length; i++){
-                    suffix += args[i] + " ";
-                }
-                suffix = suffix.substring(0, suffix.length() - 1);
-                if(suffix.length() > 16){
-                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.suffix.suffix_too_long"));
-                    return true;
-                }
-                FactionsManager.setFactionSuffix(player, suffix);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.suffix.success",suffix));
-                return true;
-            }
-
             if(args[0].equalsIgnoreCase("color")){
                 if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.color.no_color"));
@@ -577,6 +544,49 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             }
         }
         if(args.length == 3){
+            if (args[0].equalsIgnoreCase("prefix")){
+                if(args[1].isEmpty() || args[1].equalsIgnoreCase("")){
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.no_prefix"));
+                    return true;
+                }
+                String prefix = args[1];
+                prefix = prefix.substring(1, prefix.length() - 1);
+                if(prefix.length() > 16){
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.prefix_too_long"));
+                    return true;
+                }
+                ChatColor prefixColor = ChatColor.valueOf(args[2]);
+                if(ChatColor.getByChar(prefixColor.getChar()) == null){
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.invalid_color"));
+                    return true;
+                }
+                FactionsManager.setFactionPrefix(player, prefix);
+                FactionsManager.setFactionPrefixColor(player, args[2]);
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.prefix.success", prefixColor + prefix));
+                return true;
+            }
+
+            if (args[0].equalsIgnoreCase("suffix")){
+                if(args[1].equalsIgnoreCase("")){
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.suffix.no_suffix"));
+                    return true;
+                }
+                String suffix = "";
+                suffix = suffix.substring(1, suffix.length() - 1);
+                if(suffix.length() > 16){
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.suffix.suffix_too_long"));
+                    return true;
+                }
+                ChatColor suffixColor = ChatColor.valueOf(args[2]);
+                if(ChatColor.getByChar(suffixColor.getChar()) == null){
+                    player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.suffix.invalid_color"));
+                    return true;
+                }
+                FactionsManager.setFactionSuffix(player, suffix);
+                FactionsManager.setFactionSuffix(player, args[2]);
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.suffix.success", suffixColor + suffix));
+                return true;
+            }
 
             if(args[0].equalsIgnoreCase("rules")){
                 if(args.length == 1 || args[1].isEmpty() || args[1].equalsIgnoreCase("")){
@@ -806,6 +816,12 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 for(FactionInvite i : FactionsManager.factionInvites.get(player.getUniqueId())){
                     suggestions.add(i.faction.getName());
                 }
+                return suggestions;
+            }else if(args[0].equalsIgnoreCase("prefix") || args[0].equalsIgnoreCase("suffix")){
+                for(ChatColor c : ChatColor.values()){
+                    suggestions.add(c.name());
+                }
+                return suggestions;
             }
         } else {
             // No suggestions for other arguments

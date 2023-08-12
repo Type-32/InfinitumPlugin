@@ -31,53 +31,11 @@ public class FactionsManager {
     private static List<Faction> factions = new ArrayList<>();
     public static HashMap<UUID, List<FactionInvite>> factionInvites = new HashMap<>();
 
-    public static FactionInvite findInvite(String factionId){
-        if(factionInvites.isEmpty()) return null;
-        for (UUID uuid : factionInvites.keySet()) {
-            for (FactionInvite factionInvite : factionInvites.get(uuid)) {
-                if(factionInvite.faction.getFactionId().equals(factionId)){
-                    return factionInvite;
-                }
-            }
-        }
-        return null;
-    }
-    public static FactionInvite findInvite(Player player){
-        if(factionInvites.isEmpty()) return null;
-        for (UUID uuid : factionInvites.keySet()) {
-            for (FactionInvite factionInvite : factionInvites.get(uuid)) {
-                if(factionInvite.sender.getUUID().equals(player.getUniqueId())){
-                    return factionInvite;
-                }
-            }
-        }
-        return null;
-    }
-    public static boolean isMemberInFaction(Player player, Faction faction){
-        if(factions.isEmpty()) return false;
-        for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-            if(playerInfo.getUUID().equals(player.getUniqueId())){
-                return true;
-            }
-        }
-        return false;
-    }
     public static boolean findPlayerInFaction(Player player) {
         if(factions.isEmpty()) return false;
         for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    public static boolean findPlayerInFaction(UUID uuid){
-        if(factions.isEmpty()) return false;
-        for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUUID().equals(uuid)) {
+            for (FactionPlayerInfo playerInfo : faction.getAllMembers(false)) {
+                if (playerInfo.getUUID().equals(player.getUniqueId())) {
                     return true;
                 }
             }
@@ -87,8 +45,8 @@ public class FactionsManager {
     public static String getFactionRuleValue(Player player, String rule){
         if(factions.isEmpty()) return null;
         for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
+            for (FactionPlayerInfo playerInfo : faction.getAllMembers(false)) {
+                if (playerInfo.getUUID().equals(player.getUniqueId())) {
                     return faction.factionSettings.getSettingsValue(rule).toString();
                 }
             }
@@ -98,8 +56,8 @@ public class FactionsManager {
     public static FactionPlayerInfo getPlayerInFaction(Player player){
         if(factions.isEmpty()) return null;
         for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
+            for (FactionPlayerInfo playerInfo : faction.getAllMembers(false)) {
+                if (playerInfo.getUUID().equals(player.getUniqueId())) {
                     return playerInfo;
                 }
             }
@@ -112,8 +70,8 @@ public class FactionsManager {
     public static boolean isPlayerLeader(Player player){
         if(factions.isEmpty()) return false;
         for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
+            for (FactionPlayerInfo playerInfo : faction.getAllMembers(false)) {
+                if (playerInfo.getUUID().equals(player.getUniqueId())) {
                     return playerInfo.isLeader();
                 }
             }
@@ -123,8 +81,8 @@ public class FactionsManager {
     public static boolean isFactionNull(Player player){
         if(factions.isEmpty()) return true;
         for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
+            for (FactionPlayerInfo playerInfo : faction.getAllMembers(false)) {
+                if (playerInfo.getUUID().equals(player.getUniqueId())) {
                     return faction == null;
                 }
             }
@@ -137,40 +95,20 @@ public class FactionsManager {
     public static boolean isPlayerModerator(Player player){
         if(factions.isEmpty()) return false;
         for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
+            for (FactionPlayerInfo playerInfo : faction.getAllMembers(false)) {
+                if (playerInfo.getUUID().equals(player.getUniqueId())) {
                     return playerInfo.isModerator();
                 }
             }
         }
         return false;
     }
-    public static void addPlayerToFaction(Player player, Faction faction, boolean isMember, boolean isModerator, boolean isLeader){
-        for (Faction faction1 : factions) {
-            for (FactionPlayerInfo playerInfo : faction1.getMembers()) {
-                if (playerInfo.getUsername().equals(player.getName())) {
-                    playerInfo.setFaction(faction);
-                    playerInfo.setMember(true);
-                    playerInfo.setLeader(false);
-                    playerInfo.setModerator(false);
-                }
-            }
-        }
-    }
-    public static Faction addFaction(String factionName, ChatColor factionColor, Player leader) {
-        Faction newFaction = new Faction(factionName, new FactionPlayerInfo(leader), factionColor);
-        factions.add(newFaction);
-        return newFaction;
-    }
-    public static void removeFaction(Faction faction){
-        factions.remove(faction);
-    }
     public static Faction getPlayerFaction(Player player){
         if(!findPlayerInFaction(player)) return null;
         for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
+            for (FactionPlayerInfo playerInfo : faction.getAllMembers(false)) {
                 if (playerInfo.getUUID().equals(player.getUniqueId())) {
-                    if(!player.getName().equals(playerInfo.getUUID().toString())){
+                    if(!player.getUniqueId().equals(playerInfo.getUUID())){
                         playerInfo.setPlayer(player);
                     }
                     return faction;
@@ -178,24 +116,6 @@ public class FactionsManager {
             }
         }
         return null;
-    }
-    public static Faction getPlayerFaction(UUID uuid){
-        if(!findPlayerInFaction(uuid)) return null;
-        for (Faction faction : factions) {
-            for (FactionPlayerInfo playerInfo : faction.getMembers()) {
-                if (playerInfo.getUUID().equals(uuid)) {
-                    return faction;
-                }
-            }
-        }
-        return null;
-    }
-    public static void updatePlayerInfos(){
-        InfinitumPlugin.getInstance().getServer().getOnlinePlayers().forEach(player -> {
-            if(findPlayerInFaction(player)){
-                getPlayerInFaction(player).setPlayer(player);
-            }
-        });
     }
     public static void writeToFile() {
         JSONArray factionsJsonArray = new JSONArray();
@@ -313,15 +233,6 @@ public class FactionsManager {
     public static boolean isSameFaction(Player player, Faction faction){
         if(!findPlayerInFaction(player)) return false;
         return getPlayerFaction(player).equals(faction);
-    }
-
-    public static boolean isSameFaction(Faction faction, Player player){
-        if(!findPlayerInFaction(player)) return false;
-        return getPlayerFaction(player).equals(faction);
-    }
-
-    public static boolean isSameFaction(Faction faction1, Faction faction2){
-        return faction1.equals(faction2);
     }
 
     public static void disbandFaction(Player player) {
