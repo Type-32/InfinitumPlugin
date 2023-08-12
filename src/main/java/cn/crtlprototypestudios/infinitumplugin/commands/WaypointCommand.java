@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class WaypointCommand implements CommandExecutor, TabCompleter {
-
+    //TODO: WaypointCommand.java needs a reinspection. The translation keys are defaulted to Chinese for some reason and the /waypoints share is not working.
     public TextComponent createListMessage(Waypoint waypoint) {
         TextComponent message = new TextComponent(ChatColor.YELLOW + " -> ");
 
@@ -224,6 +224,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
         } else if (args.length >= 4) {
+            //TODO: Fix the bug here. There is somehow a bug in here
             if(args[0].equalsIgnoreCase("share")){
                 if(args[2].equalsIgnoreCase("with")){
                     for(int i = 3; i < args.length; i++){

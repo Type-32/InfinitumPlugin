@@ -258,7 +258,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 FactionsManager.createFaction(player, args[1]);
-                player.sendMessage(ChatColor.GREEN + LocalesManager.getProp("msg.command.factions.create.success"));
+                player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.create.success",ChatColor.GOLD + FactionsManager.getPlayerFaction(player).getName()));
                 return true;
             }
 

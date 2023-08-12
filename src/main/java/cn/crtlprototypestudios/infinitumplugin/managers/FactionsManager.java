@@ -177,7 +177,7 @@ public class FactionsManager {
     }
 
     public static void createFaction(Player player, String factionName) {
-        Faction faction = new Faction(factionName, new FactionPlayerInfo(player), ChatColor.WHITE);
+        Faction faction = new Faction(factionName, new FactionPlayerInfo(player, true), ChatColor.WHITE);
         factions.add(faction);
         writeToFile();
     }

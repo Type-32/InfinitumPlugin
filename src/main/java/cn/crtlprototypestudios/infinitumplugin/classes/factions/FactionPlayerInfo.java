@@ -16,6 +16,11 @@ public class FactionPlayerInfo {
     private boolean isMember = false;
     private ArrayList<Faction> alliedFactions = new ArrayList<Faction>();
     private ArrayList<Faction> enemyFactions = new ArrayList<Faction>();
+    public FactionPlayerInfo(Player player, boolean isLeader){
+        this.username = player.getName();
+        this.uuid = player.getUniqueId();
+        this.isLeader = isLeader;
+    }
     public FactionPlayerInfo(Player player){
         this.username = player.getName();
         this.uuid = player.getUniqueId();
