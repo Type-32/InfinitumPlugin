@@ -6,7 +6,7 @@
 
     <groupId>cn.crtlprototypestudios</groupId>
     <artifactId>InfinitumPlugin</artifactId>
-    <version>1.0.0-indev6.prev-add352d7</version>
+    <version>1.0.0-indev7.prev-5bd353ac</version>
     <packaging>jar</packaging>
 
     <name>InfinitumPlugin</name>

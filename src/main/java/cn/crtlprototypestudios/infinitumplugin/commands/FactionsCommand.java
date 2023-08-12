@@ -810,7 +810,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 }catch (Exception e){
                     return new ArrayList<>();
                 }
-                if(FactionsManager.factionInvites.get(player.getUniqueId()).isEmpty()) return new ArrayList<>();
+                if(FactionsManager.factionInvites.get(player.getUniqueId()) == null) return new ArrayList<>();
 
                 for(FactionInvite i : FactionsManager.factionInvites.get(player.getUniqueId())){
                     suggestions.add(i.faction.getName());

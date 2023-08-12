@@ -11,7 +11,7 @@ public class EconomyVault {
     private String ownerUsername = "";
     private int money = 0;
     private ArrayList<EconomyHistory> history = new ArrayList<EconomyHistory>();
-    private EconomyVaultSettings settings;
+    private EconomyVaultSettings settings = new EconomyVaultSettings();
     public EconomyVault(String name, String ownerUsername, UUID uuid, int money) {
         this.name = name;
         this.ownerUsername = ownerUsername;
