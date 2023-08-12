@@ -47,7 +47,15 @@ public class FactionsManager {
         }
         return null;
     }
-
+    public static boolean isMemberInFaction(Player player, Faction faction){
+        if(factions.isEmpty()) return false;
+        for (FactionPlayerInfo playerInfo : faction.getMembers()) {
+            if(playerInfo.getUUID().equals(player.getUniqueId())){
+                return true;
+            }
+        }
+        return false;
+    }
     public static boolean findPlayerInFaction(Player player) {
         if(factions.isEmpty()) return false;
         for (Faction faction : factions) {

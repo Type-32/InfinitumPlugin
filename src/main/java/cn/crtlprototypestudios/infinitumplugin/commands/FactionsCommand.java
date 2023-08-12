@@ -6,6 +6,7 @@ import cn.crtlprototypestudios.infinitumplugin.classes.factions.FactionPlayerInf
 import cn.crtlprototypestudios.infinitumplugin.classes.factions.FactionSettings;
 import cn.crtlprototypestudios.infinitumplugin.managers.FactionsManager;
 import cn.crtlprototypestudios.infinitumplugin.managers.LocalesManager;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
@@ -136,6 +137,36 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
         }
         return message;
     }
+    public TextComponent createInviteMessage(List<FactionInvite> factionInvite){
+        /*
+        Faction Invites:
+            - Invite from <Faction Name> sent by <Sender Name>. [Join] [Deny]
+         */
+        TextComponent message = new TextComponent();
+        message.addExtra(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.invite.header"));
+
+        for(FactionInvite invite : factionInvite){
+            TextComponent line = new TextComponent();
+            line.setText(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.invite.body_message"),invite.faction.getName(), invite.sender.getUsername()) + " ");
+
+            TextComponent joinButton = new TextComponent();
+            joinButton.setText(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invite.join"));
+            joinButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/factions invites accept " + invite.faction.getName()));
+            joinButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invite.join_hover"))));
+
+            TextComponent denyButton = new TextComponent();
+            denyButton.setText(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invite.deny"));
+            denyButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/factions invites deny " + invite.faction.getName()));
+            denyButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invite.deny_hover"))));
+
+            line.addExtra(joinButton);
+            line.addExtra(ChatColor.GRAY + " ");
+            line.addExtra(denyButton);
+
+            message.addExtra(line);
+        }
+        return message;
+    }
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         Player player = (Player) commandSender;
@@ -151,6 +182,9 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
 
         if(args.length == 1){
             switch(args[0]){
+                case "create":
+                    player.sendMessage(ChatColor.GRAY + LocalesManager.Locales.getString("msg.command.factions.create.usage"));
+                    return true;
                 case "list":
                     if(FactionsManager.getFactions().isEmpty()){
                         player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.list.no_factions"));
@@ -306,8 +340,12 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.player_not_in_faction"));
                     return true;
                 }
-                if(FactionsManager.isPlayerLeader(target) && FactionsManager.getPlayerFaction(target).equals(FactionsManager.getPlayerFaction(player))){
+                if(FactionsManager.isPlayerLeader(target) && FactionsManager.isSameFaction(player, target)){
                     player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.cannot_promote_leader"));
+                    return true;
+                }
+                if(!FactionsManager.isSameFaction(player, target)){
+                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.promote.not_same_faction"));
                     return true;
                 }
                 if(FactionsManager.isPlayerModerator(target)){
@@ -510,7 +548,12 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("list")) {
-
+                    if (inviters == null || inviters.isEmpty()) {
+                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invites.no_invites"));
+                        return true;
+                    }
+                    player.sendMessage(createInviteMessage(inviters));
+                    return true;
                 }
             }
         }

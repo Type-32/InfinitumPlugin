@@ -32,9 +32,23 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
         waypointCoords.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(LocalesManager.Locales.getString("msg.command.waypoint.listall.textcomp.click_copy_coords"))));
 
         message.addExtra(waypointName); //(ChatColor.GOLD + waypoint.getWorld().getName())
-        message.addExtra((ChatColor.YELLOW + LocalesManager.Locales.getString("msg.command.waypoint.listall.textcomp.in_world_at_pos").format(ChatColor.GOLD + waypoint.getWorld().getName())));
+        message.addExtra((ChatColor.YELLOW + String.format(LocalesManager.Locales.getString("msg.command.waypoint.listall.textcomp.in_world_at_pos"),ChatColor.GOLD + waypoint.getWorld().getName())));
         message.addExtra(waypointCoords);
 
+        return message;
+    }
+    public TextComponent createShareMessage(Player sender, Waypoint waypoint){
+        TextComponent message = new TextComponent(ChatColor.AQUA + String.format(LocalesManager.Locales.getString("msg.command.waypoint.share.textcomp.share_waypoint"),ChatColor.GOLD + sender.getName(), ChatColor.GOLD + "\"" + waypoint.getName() + "\""));
+        TextComponent addButton = new TextComponent(" " + ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.waypoint.share.textcomp.add_button"));
+        addButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/waypoint accept " + sender.getName() + waypoint.getName()));
+        addButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(LocalesManager.Locales.getString("msg.command.waypoint.share.textcomp.add_button_tip"))));
+
+        TextComponent denyButton = new TextComponent(" " + ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.share.textcomp.deny_button"));
+        denyButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/waypoint accept " + sender.getName() + waypoint.getName()));
+        denyButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(LocalesManager.Locales.getString("msg.command.waypoint.share.textcomp.deny_button_tip"))));
+
+        message.addExtra(addButton);
+        message.addExtra(denyButton);
         return message;
     }
     @Override
@@ -76,7 +90,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.waypoint.listall.available_waypoints_header"));
                 for(UUID id : WaypointManager.getPlayers()){
                     if (Bukkit.getPlayer(id) == null) {
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.listall.nonexisting_uuid").format(String.valueOf(id)));
+                        player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.listall.nonexisting_uuid"),String.valueOf(id)));
                         WaypointManager.removePlayer(id);
                         continue;
                     }
@@ -105,35 +119,35 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             switch (args[0]) {
                 case "add":
                     if (WaypointManager.hasWaypoint(player, args[1])) {
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.waypoint_exists").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                        player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.waypoint_exists"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                         return true;
                     }
                     WaypointManager.addWaypoint(player, new Waypoint(args[1], player.getLocation()));
-                    player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.waypoint.add.success").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                    player.sendMessage(ChatColor.AQUA + String.format(LocalesManager.Locales.getString("msg.command.waypoint.add.success"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                     break;
                 case "remove":
                     if (!WaypointManager.hasWaypoint(player, args[1])) {
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                        player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                         return true;
                     }
                     WaypointManager.removeWaypoint(player, args[1]);
-                    player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.waypoint.remove.success").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                    player.sendMessage(ChatColor.AQUA + String.format(LocalesManager.Locales.getString("msg.command.waypoint.remove.success"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                     break;
                 case "goto":
                     if (!WaypointManager.hasWaypoint(player, args[1])) {
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                        player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                         return true;
                     }
                     player.teleport(WaypointManager.getWaypoint(player, args[1]).toLocation());
-                    player.sendMessage(LocalesManager.Locales.getString("msg.command.waypoint.goto.success").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                    player.sendMessage(String.format(LocalesManager.Locales.getString("msg.command.waypoint.goto.success"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                     break;
                 case "override":
                     if (!WaypointManager.hasWaypoint(player, args[1])) {
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                        player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                         return true;
                     }
 
-                    player.sendMessage(LocalesManager.Locales.getString("msg.command.waypoint.override.success").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                    player.sendMessage(String.format(LocalesManager.Locales.getString("msg.command.waypoint.override.success"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                     WaypointManager.overrideWaypoint(player, args[1], new Waypoint(args[1],player.getLocation()));
                     break;
                 case "listall":
@@ -148,7 +162,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ChatColor.AQUA + LocalesManager.Locales.getString("msg.command.waypoint.listall.available_waypoints_header"));
                     for(UUID id : WaypointManager.getPlayers()){
                         if (Bukkit.getPlayer(id) == null) {
-                            player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.listall.nonexisting_uuid").format(String.valueOf(id)));
+                            player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.listall.nonexisting_uuid"),String.valueOf(id)));
                             WaypointManager.removePlayer(id);
                             continue;
                         }
@@ -159,11 +173,10 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     }
                     break;
                 case "share":
-                    if(WaypointManager.getWaypoint(player, args[1]) == null){
-                        player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint").format(ChatColor.GOLD + "\"" + args[1] + "\""));
-                        return true;
-                    }
-
+                    player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
+                    break;
+                case "accept":
+                    player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
                     break;
                 default:
                     player.sendMessage(ChatColor.GRAY + (!player.isOp() ? LocalesManager.Locales.getString("msg.command.waypoint.usage") : LocalesManager.Locales.getString("msg.command.waypoint.usage_op")));
@@ -176,23 +189,56 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     //TODO: composite clickable message
                 }
             }
-
+            if(args[0].equalsIgnoreCase("accept")){
+                if(!WaypointManager.sharedWaypoints.keySet().contains(player.getUniqueId())){
+                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.accept.no_shared_waypoints"));
+                    return true;
+                }
+                if(WaypointManager.sharedWaypoints.get(player.getUniqueId()).isEmpty()){
+                    player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.accept.no_shared_waypoints"));
+                    return true;
+                }
+                if(Bukkit.getPlayer(args[1]) == null){
+                    player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.accept.nonexisting_player"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
+                    return true;
+                }
+                if(WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])) == null || WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])).isEmpty()){
+                    player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.accept.nonexisting_player"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
+                    return true;
+                }
+                if(WaypointManager.hasWaypoint(player,WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]).getName())){
+                    player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.accept.existing_waypoint"),(ChatColor.GOLD + "\"" + args[2] + "\"")));
+                    return true;
+                }
+                boolean flag = false;
+                for(Waypoint wp : WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]))){
+                    if(WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]) != null && WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]).equals(wp)){
+                        WaypointManager.addWaypoint(player, wp);
+                        flag = true;
+                        break;
+                    }
+                }
+                if(!flag){
+                    player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.accept.nonexisting_waypoint"),(ChatColor.GOLD + "\"" + args[2] + "\"")));
+                }
+                return true;
+            }
         } else if (args.length >= 4) {
             if(args[0].equalsIgnoreCase("share")){
                 if(args[2].equalsIgnoreCase("with")){
                     for(int i = 3; i < args.length; i++){
                         Player target = Bukkit.getPlayer(args[i]);
                         if(target == null) {
-                            player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.share.nonexisting_player").format(ChatColor.GOLD + "\"" + args[i] + "\""));
+                            player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.share.nonexisting_player"),(ChatColor.GOLD + "\"" + args[i] + "\"")));
                             continue;
                         }else{
                             if(!WaypointManager.hasWaypoint(player, args[1])){
-                                player.sendMessage(ChatColor.RED + LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint").format(ChatColor.GOLD + "\"" + args[1] + "\""));
+                                player.sendMessage(ChatColor.RED + String.format(LocalesManager.Locales.getString("msg.command.waypoint.null_waypoint"),(ChatColor.GOLD + "\"" + args[1] + "\"")));
                                 return true;
                             }
                             WaypointManager.shareWaypoint(player, target, args[1]);
-                            player.sendMessage(LocalesManager.Locales.getString("msg.command.waypoint.share.success").format(ChatColor.GOLD + "\"" + args[1] + "\"", ChatColor.GOLD + target.getName()));
-                            // TODO: compose clickable message for receiver
+                            player.sendMessage(String.format(LocalesManager.Locales.getString("msg.command.waypoint.share.success"),(ChatColor.GOLD + "\"" + args[1] + "\""), ChatColor.GOLD + target.getName()));
+                            target.sendMessage(createShareMessage(player, WaypointManager.getWaypoint(player, args[1])));
                         }
                     }
                 }
@@ -242,8 +288,10 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             return suggestions;
         } else if (args.length == 3 && args[0].equalsIgnoreCase("accept")) {
             List<String> suggestions = new ArrayList<>();
-            for (Waypoint wp : WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]).getUniqueId())) {
+            if(WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])) == null || WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])).isEmpty()) return null;
+            for (Waypoint wp : WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]))) {
                 if(Bukkit.getPlayer(args[1]) == null) continue;
+                if(WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]) == null) continue;
                 suggestions.add(wp.getName());
             }
             return suggestions;
