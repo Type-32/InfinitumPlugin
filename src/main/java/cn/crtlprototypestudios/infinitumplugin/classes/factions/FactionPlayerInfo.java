@@ -21,6 +21,11 @@ public class FactionPlayerInfo {
         this.username = player.getName();
         this.uuid = player.getUniqueId();
     }
+    public FactionPlayerInfo(Player player, Faction faction){
+        this.username = player.getName();
+        this.uuid = player.getUniqueId();
+        this.faction = faction;
+    }
     public Player getPlayer(){
         return (Player) Bukkit.getPlayer(uuid);
     }

@@ -777,8 +777,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 }
             }else if (args[0].equalsIgnoreCase("invites")){
                 Faction faction = FactionsManager.getPlayerFaction(player);
-                if(FactionsManager.isFactionNull(faction)) return null;
-                if(FactionsManager.findPlayerInFaction(player)){
+                if(!FactionsManager.findPlayerInFaction(player) || FactionsManager.isFactionNull(faction)){
                     suggestions.add("accept");
                     suggestions.add("deny");
                     suggestions.add("list");
@@ -809,9 +808,9 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 try{
                     FactionsManager.factionInvites.get(player.getUniqueId());
                 }catch (Exception e){
-                    return null;
+                    return new ArrayList<>();
                 }
-                if(FactionsManager.factionInvites.get(player.getUniqueId()).isEmpty()) return null;
+                if(FactionsManager.factionInvites.get(player.getUniqueId()).isEmpty()) return new ArrayList<>();
 
                 for(FactionInvite i : FactionsManager.factionInvites.get(player.getUniqueId())){
                     suggestions.add(i.faction.getName());

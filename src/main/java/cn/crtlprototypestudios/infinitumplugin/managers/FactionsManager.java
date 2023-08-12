@@ -177,7 +177,10 @@ public class FactionsManager {
     }
 
     public static void createFaction(Player player, String factionName) {
-        Faction faction = new Faction(factionName, new FactionPlayerInfo(player), ChatColor.WHITE);
+        FactionPlayerInfo leader = new FactionPlayerInfo(player);
+        Faction faction = new Faction(factionName, leader, ChatColor.WHITE);
+        leader.setFaction(faction);
+        faction.setLeader(leader);
         factions.add(faction);
         writeToFile();
     }
@@ -194,7 +197,7 @@ public class FactionsManager {
     public static void joinFaction(Player player, String factionName) {
         Faction faction = getFaction(factionName);
         if (faction != null) {
-            faction.addMember(new FactionPlayerInfo(player));
+            faction.addMember(new FactionPlayerInfo(player, faction));
             writeToFile();
         }
         throw new IllegalArgumentException("Faction does not exist");
