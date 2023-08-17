@@ -1,6 +1,5 @@
 package cn.crtlprototypestudios.infinitumplugin.classes.waypoints;
 
-import cn.crtlprototypestudios.infinitumplugin.classes.factions.Faction;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.json.simple.JSONObject;
@@ -9,8 +8,7 @@ public class Waypoint {
     private String name;
     private World world;
     private double x, y, z;
-    private boolean isShared = false, isFactionShared = false;
-    private Faction sharedByFaction = null;
+
     public Waypoint(String name, World world, double x, double y, double z) {
         this.name = name;
         this.world = world;
@@ -25,22 +23,12 @@ public class Waypoint {
         this.y = location.getY();
         this.z = location.getZ();
     }
-    public Waypoint(Waypoint waypoint, boolean isShared){
+    public Waypoint(Waypoint waypoint){
         this.name = waypoint.getName();
         this.world = waypoint.getWorld();
         this.x = waypoint.getX();
         this.y = waypoint.getY();
         this.z = waypoint.getZ();
-        this.isShared = isShared;
-    }
-    public Waypoint(Waypoint waypoint, boolean isFactionShared, Faction faction){
-        this.name = waypoint.getName();
-        this.world = waypoint.getWorld();
-        this.x = waypoint.getX();
-        this.y = waypoint.getY();
-        this.z = waypoint.getZ();
-        this.isFactionShared = isFactionShared;
-        this.sharedByFaction = faction;
     }
     public Waypoint(JSONObject object){
         this.name = object.get("name").toString();
@@ -48,11 +36,6 @@ public class Waypoint {
         this.x = Double.parseDouble(object.get("x").toString());
         this.y = Double.parseDouble(object.get("y").toString());
         this.z = Double.parseDouble(object.get("z").toString());
-        this.isShared = Boolean.parseBoolean(object.get("isShared").toString());
-        this.isFactionShared = Boolean.parseBoolean(object.get("isFactionShared").toString());
-        if(isFactionShared){
-            this.sharedByFaction = new Faction((JSONObject) object.get("sharedByFaction"));
-        }
     }
 
     public String getName() {
@@ -73,23 +56,6 @@ public class Waypoint {
 
     public double getZ() {
         return z;
-    }
-
-    public boolean isShared() {
-        return isShared;
-    }
-    public void setShared(boolean shared) {
-        isShared = shared;
-    }
-    public boolean isFactionShared() {
-        return isFactionShared;
-    }
-    public boolean setFactionShared(boolean factionShared) {
-        isFactionShared = factionShared;
-        return isFactionShared;
-    }
-    public Faction getSharedByFaction() {
-        return sharedByFaction;
     }
 
     public void setXYZ(double x, double y, double z){
@@ -116,11 +82,6 @@ public class Waypoint {
         temp.put("x",x);
         temp.put("y",y);
         temp.put("z",z);
-        temp.put("isShared",isShared);
-        temp.put("isFactionShared",isFactionShared);
-        if(isFactionShared){
-            temp.put("sharedByFaction",sharedByFaction.toJSONObject());
-        }
         return temp;
     }
 

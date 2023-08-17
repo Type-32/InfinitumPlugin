@@ -1,14 +1,19 @@
 package cn.crtlprototypestudios.infinitumplugin.classes.factions;
 
 import cn.crtlprototypestudios.infinitumplugin.classes.economy.EconomyVault;
+import cn.crtlprototypestudios.infinitumplugin.classes.waypoints.SharedWaypoint;
+import cn.crtlprototypestudios.infinitumplugin.classes.waypoints.Waypoint;
 import cn.crtlprototypestudios.infinitumplugin.managers.FactionsManager;
 import cn.crtlprototypestudios.infinitumplugin.managers.LocalesManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class Faction {
     private String name = "";
@@ -25,6 +30,7 @@ public class Faction {
     private ChatColor suffixColor = ChatColor.WHITE;
     private String factionId = "";
     public FactionSettings factionSettings;
+    private List<SharedWaypoint> factionSharedWaypoints;
     public Faction(JSONObject factionJSON){
         this.name = (String) factionJSON.get("name");
         this.prefix = (String) factionJSON.get("prefix");
@@ -35,6 +41,10 @@ public class Faction {
         this.vault = new EconomyVault((JSONObject) factionJSON.get("vault"));
         this.factionSettings = new FactionSettings((JSONObject) factionJSON.get("factionSettings"));
         this.factionId = (String) factionJSON.get("factionId");
+        this.factionSharedWaypoints.clear();
+        for(Object object : (JSONArray) factionJSON.get("sharedWaypoints")){
+            this.factionSharedWaypoints.add(new SharedWaypoint((JSONObject) object));
+        }
     }
     public Faction(String name, FactionPlayerInfo leader, ChatColor color){
         this.name = name;
@@ -47,6 +57,24 @@ public class Faction {
         this.vault = new EconomyVault("Faction " + name + "'s Vault", leader.getUsername(), leader.getUUID(), 0);
         this.factionSettings = new FactionSettings();
         this.factionId = FactionsManager.generateFactionId();
+        this.factionSharedWaypoints = new ArrayList<>();
+    }
+    public List<SharedWaypoint> getFactionSharedWaypoints(){
+        return factionSharedWaypoints;
+    }
+    public void addSharedWaypoint(Waypoint waypoint, UUID sharingPlayer){
+        factionSharedWaypoints.add(new SharedWaypoint(waypoint, sharingPlayer));
+    }
+    public void removeSharedWaypoint(Waypoint waypoint, UUID sharingPlayer){
+        for(SharedWaypoint wp : factionSharedWaypoints){
+            if(wp.getSharingPlayer().equals(sharingPlayer) && wp.equals(waypoint)){
+                factionSharedWaypoints.remove(wp);
+                return;
+            }
+        }
+    }
+    public void clearSharedWaypoints(){
+        factionSharedWaypoints.clear();
     }
     public String getFactionId(){
         return factionId;

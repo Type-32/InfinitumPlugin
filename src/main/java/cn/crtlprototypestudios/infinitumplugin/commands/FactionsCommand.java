@@ -130,16 +130,12 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if((args.length <= 1 || args.length == 0) && !(args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("listall") || args[0].equalsIgnoreCase("info"))){
+        if(args.length == 0){
             player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.usage"));
             return true;
         }
-
-        if(args.length == 1){
+        else if(args.length == 1){
             switch(args[0]){
-                case "create":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.create.usage"));
-                    return true;
                 case "list":
                     if(FactionsManager.getFactions().isEmpty()){
                         player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.list.no_factions"));
@@ -196,55 +192,15 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.disband.success",FactionsManager.getPlayerFaction(player).getName()));
 
                     return true;
-                case "rules":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.rules.usage"));
-                    return true;
-                case "invites":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.invites.usage"));
-                    return true;
-                case "join":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.join.usage"));
-                    return true;
-                case "kick":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.kick.usage"));
-                    return true;
-                case "promote":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.promote.usage"));
-                    return true;
-                case "demote":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.demote.usage"));
-                    return true;
-                case "invite":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.invite.usage"));
-                    return true;
-                case "prefix":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.prefix.usage"));
-                    return true;
-                case "suffix":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.suffix.usage"));
-                    return true;
-                case "color":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.color.usage"));
-                    return true;
-                case "ally":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.ally.usage"));
-                    return true;
-                case "enemy":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.enemy.usage"));
-                    return true;
-                case "neutral":
-                    player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.neutral.usage"));
-                    return true;
             }
         }
-
-        if(args.length == 2){
-            if(args[0].equalsIgnoreCase("prefix") || args[0].equalsIgnoreCase("suffix")){
-                player.sendMessage(ChatColor.GRAY + LocalesManager.getProp(args[0].equalsIgnoreCase("prefix") ? "msg.command.factions.prefix.usage" : "msg.command.factions.suffix.usage"));
-                return true;
-            }
-
+        else if(args.length == 2){
             if(args[0].equalsIgnoreCase("create")){
+                /*
+                  Usage: /factions create <Faction Name>
+                  This function creates a faction and makes the player that executed the command the leader of the faction.
+                 */
+
                 if(FactionsManager.findPlayerInFaction(player)){
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.create.already_in_faction"));
                     return true;
@@ -263,20 +219,25 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             }
 
             if(args[0].equalsIgnoreCase("join")){
-                if(FactionsManager.findPlayerInFaction(player)){
+                /*
+                    Usage: /factions join <Faction Name>
+                    This command joins the command sender to the faction.
+                 */
+
+                if(FactionsManager.findPlayerInFaction(player)){ // Check if player is in faction
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.join.already_in_faction"));
                     return true;
                 }
-                if(!FactionsManager.factionExists(args[1])){
+                if(!FactionsManager.factionExists(args[1])){ // Check if faction exists
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.join.faction_not_exists"));
                     return true;
                 }
-                if(!FactionsManager.getFaction(args[1]).factionSettings.factionPublic){
+                if(!FactionsManager.getFaction(args[1]).factionSettings.factionPublic){ // Check if faction allows everyone to join
                     player.sendMessage(ChatColor.RED + (FactionsManager.getFaction(args[1]).factionSettings.factionPublic ? LocalesManager.Locales.getString("msg.command.factions.join.faction_not_public") : LocalesManager.Locales.getString("msg.command.factions.join.faction_not_public_hidden")));
                     return true;
                 }
                 try{
-                    FactionsManager.joinFaction(player, args[1]);
+                    FactionsManager.joinFaction(player, args[1]); // the joinFaction() function throws an exception if the player is not allowed to join the faction.
                 } catch (Exception e){
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.join.error"));
                     return true;
@@ -486,12 +447,12 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.enemy.cannot_enemy_self"));
                     return true;
                 }
-                if (FactionsManager.getPlayerFaction(player).getAlliedFactions().contains(FactionsManager.getFaction(args[1]))) {
-                    FactionsManager.unallyFactions(player, FactionsManager.getFaction(args[1]));
-                }
                 if (FactionsManager.getPlayerFaction(player).getEnemyFactions().contains(FactionsManager.getFaction(args[1]))) {
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.enemy.already_enemy"));
                     return true;
+                }
+                if (FactionsManager.getPlayerFaction(player).getAlliedFactions().contains(FactionsManager.getFaction(args[1]))) {
+                    FactionsManager.unallyFactions(player, FactionsManager.getFaction(args[1]));
                 }
                 FactionsManager.enemyFactions(player, FactionsManager.getFaction(args[1]));
                 player.sendMessage(ChatColor.GREEN + LocalesManager.getPropFormatted("msg.command.factions.enemy.success", FactionsManager.getFaction(args[1]).getName()));
@@ -505,6 +466,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                 }
+                return true;
             }
 
             if(args[0].equalsIgnoreCase("neutral")){
@@ -541,9 +503,10 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                 }
+                return true;
             }
         }
-        if(args.length == 3){
+        else if(args.length == 3){
             if (args[0].equalsIgnoreCase("prefix")){
                 if(args[1].isEmpty() || args[1].equalsIgnoreCase("")){
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.prefix.no_prefix"));
@@ -612,7 +575,6 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
 
             if(args[0].equalsIgnoreCase("invites") && (args[1].equalsIgnoreCase("accept") || args[1].equalsIgnoreCase("deny"))){
                 List<FactionInvite> inviters = FactionsManager.factionInvites.get(player);
-
                 if(args[1].equalsIgnoreCase("accept")){
                     if(inviters == null || inviters.isEmpty()){
                         player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.no_invites"));
@@ -677,7 +639,52 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invites.usage_list"));
                     return true;
                 }
+                return true;
             }
+        }
+
+        if(args[0].equalsIgnoreCase("create")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.create.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("join")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.join.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("invite")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.invite.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("kick")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.kick.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("promote")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.promote.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("demote")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.demote.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("prefix")){
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.prefix.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("suffix")){
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.suffix.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("color")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.color.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("rules")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.rules.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("ally")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.ally.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("enemy")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.enemy.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("neutral")) {
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.neutral.usage"));
+            return true;
+        }else if(args[0].equalsIgnoreCase("invites")){
+            player.sendMessage(ChatColor.GRAY + LocalesManager.getProp("msg.command.factions.invites.usage"));
+            return true;
         }
         return false;
     }

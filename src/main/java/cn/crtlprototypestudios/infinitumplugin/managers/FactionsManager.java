@@ -182,6 +182,11 @@ public class FactionsManager {
         writeToFile();
     }
 
+    /**
+     * @param factionName
+     * The name of the retrieving faction.
+     * @return Object {@link Faction} with a matching name ({@code Faction.name}). Otherwise, returns null.
+     */
     public static Faction getFaction(String factionName) {
         for (Faction faction : factions) {
             if (faction.getName().equalsIgnoreCase(factionName)) {
@@ -191,7 +196,17 @@ public class FactionsManager {
         return null;
     }
 
+    /**
+     * Removes a player from their faction.
+     * @param player
+     * The player that will join the faction.
+     * @param factionName
+     * The faction that the player will join.
+     * @exception IllegalArgumentException
+     * Throws an IllegalArgumentException if the faction is not found.
+     */
     public static void joinFaction(Player player, String factionName) {
+
         Faction faction = getFaction(factionName);
         if (faction != null) {
             faction.addMember(new FactionPlayerInfo(player));

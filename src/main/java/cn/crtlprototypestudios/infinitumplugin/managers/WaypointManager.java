@@ -48,20 +48,36 @@ public class WaypointManager {
             sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).add(waypoint);
         }
     }
-    public static void shareWaypoint(Player player, Player target, String waypointName){
-preventNull(player);
+
+    /**
+     * Shares a waypoint with a player.
+     * @param player
+     * The player that shares their waypoint.
+     * @param target
+     * The player that receives the waypoint.
+     * @param waypointName
+     * The name of the waypoint to share.
+     * @return
+     * {@code true} if the shared waypoint was a duplicate.
+     */
+    public static boolean shareWaypoint(Player player, Player target, String waypointName){
+        preventNull(player);
         preventNull(target);
-        if(!sharedWaypoints.containsKey(player.getUniqueId())){
+        if(sharedWaypoints.get(player.getUniqueId()) == null){
             sharedWaypoints.put(player.getUniqueId(), new HashMap<>());
         }
-        if(!sharedWaypoints.get(player.getUniqueId()).isEmpty()) {
+        if(sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()) == null){
             List<Waypoint> temp = new ArrayList<>();
             temp.add(getWaypoint(player, waypointName));
             sharedWaypoints.get(player.getUniqueId()).put(target.getUniqueId(), temp);
         }
+        if(sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).contains(getWaypoint(player, waypointName))){
+            return true;
+        }
         if(sharedWaypoints.get(player.getUniqueId()).containsKey(target.getUniqueId())){
             sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).add(getWaypoint(player, waypointName));
         }
+        return false;
     }
     public static void addWaypoint(Player player, Waypoint waypoint){
         preventNull(player);
