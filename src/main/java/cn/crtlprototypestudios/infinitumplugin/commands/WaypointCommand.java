@@ -201,11 +201,11 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
             }
 
             if(args[0].equalsIgnoreCase("accept")){
-                if(WaypointManager.sharedWaypoints.get(player.getUniqueId()) == null || WaypointManager.sharedWaypoints.get(player.getUniqueId()).isEmpty()){
+                if(WaypointManager.sharedWaypointInvites.get(player.getUniqueId()) == null || WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).isEmpty()){
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.waypoint.accept.no_shared_waypoints"));
                     return true;
                 }
-                if(!WaypointManager.sharedWaypoints.keySet().contains(player.getUniqueId())){
+                if(!WaypointManager.sharedWaypointInvites.keySet().contains(player.getUniqueId())){
                     player.sendMessage(ChatColor.RED + LocalesManager.getProp("msg.command.waypoint.accept.no_shared_waypoints"));
                     return true;
                 }
@@ -213,7 +213,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(ChatColor.RED + String.format(LocalesManager.getPropFormatted("msg.command.waypoint.accept.nonexisting_player",ChatColor.GOLD + args[1] + ChatColor.RED)));
                     return true;
                 }
-                if(WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])) == null || WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])).isEmpty()){
+                if(WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])) == null || WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])).isEmpty()){
                     player.sendMessage(ChatColor.RED + LocalesManager.getPropFormatted("msg.command.waypoint.accept.nonexisting_player", ChatColor.GOLD + args[1] + ChatColor.RED));
                     return true;
                 }
@@ -222,7 +222,7 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 boolean flag = false;
-                for(Waypoint wp : WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]))){
+                for(Waypoint wp : WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]))){
                     if(WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]) != null && WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]).equals(wp)){
                         WaypointManager.addWaypoint(player, new Waypoint(wp));
                         flag = true;
@@ -292,52 +292,52 @@ public class WaypointCommand implements CommandExecutor, TabCompleter {
                 suggestions.add("listall");
             }
             return suggestions;
-        } else if (args.length == 2 && (args[0].equalsIgnoreCase("goto") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("override"))) {
-            List<String> suggestions = new ArrayList<>();
-            for (Waypoint wp : WaypointManager.getWaypointList(player).getValues()) {
-                suggestions.add(wp.getName());
+        } else if (args.length == 2) {
+            if(args[0].equalsIgnoreCase("goto") || args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("override") || args[0].equalsIgnoreCase("share")) {
+                List<String> suggestions = new ArrayList<>();
+                for (Waypoint wp : WaypointManager.getWaypointList(player).getValues()) {
+                    suggestions.add(wp.getName());
+                }
+                return suggestions;
             }
-            return suggestions;
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("share")){
-            List<String> suggestions = new ArrayList<>();
-            for (Waypoint wp : WaypointManager.getWaypointList(player).getValues()) {
-                suggestions.add(wp.getName());
-            }
-            return suggestions;
-        } else if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {
-            List<String> suggestions = new ArrayList<>();
-            for (UUID p : WaypointManager.sharedWaypoints.get(player.getUniqueId()).keySet()) {
-                if (Bukkit.getPlayer(p) == null) continue;
-                suggestions.add(Bukkit.getPlayer(p).getName());
-            }
-            return suggestions;
-        } else if (args.length == 3 && args[0].equalsIgnoreCase("accept")) {
-            List<String> suggestions = new ArrayList<>();
-            if(WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])) == null || WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])).isEmpty()) return null;
-            for (Waypoint wp : WaypointManager.sharedWaypoints.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]))) {
-                if(Bukkit.getPlayer(args[1]) == null) continue;
-                if(WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]) == null) continue;
-                suggestions.add(wp.getName());
-            }
-            return suggestions;
 
-        } else if (args.length == 3 && args[0].equalsIgnoreCase("share")){
-            List<String> suggestions = new ArrayList<>();
-            suggestions.add("with");
-            suggestions.add("faction");
-            return suggestions;
-        } else if (args.length >= 4 && args[0].equalsIgnoreCase("share")) {
-            List<String> suggestions = new ArrayList<>();
-            if (args[2].equalsIgnoreCase("with")) {
-                for (Player p : Bukkit.getOnlinePlayers()) {
-                    if (p.getName().startsWith(args[3])) {
-                        suggestions.add(p.getName());
+            if(args[0].equalsIgnoreCase("accept")) {
+                List<String> suggestions = new ArrayList<>();
+                for (UUID p : WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).keySet()) {
+                    if (Bukkit.getPlayer(p) == null) continue;
+                    suggestions.add(Bukkit.getPlayer(p).getName());
+                }
+                return suggestions;
+            }
+        } else if (args.length == 3) {
+            if(args[0].equalsIgnoreCase("accept")) {
+                List<String> suggestions = new ArrayList<>();
+                if (WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])) == null || WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1])).isEmpty())
+                    return null;
+                for (Waypoint wp : WaypointManager.sharedWaypointInvites.get(player.getUniqueId()).get(Bukkit.getPlayer(args[1]))) {
+                    if (Bukkit.getPlayer(args[1]) == null) continue;
+                    if (WaypointManager.getWaypoint(Bukkit.getPlayer(args[1]), args[2]) == null) continue;
+                    suggestions.add(wp.getName());
+                }
+                return suggestions;
+            }
+            if(args[0].equalsIgnoreCase("share")) {
+                List<String> suggestions = new ArrayList<>();
+                suggestions.add("with");
+                suggestions.add("faction");
+                return suggestions;
+            }
+        } else if (args.length == 4) {
+            if(args[0].equalsIgnoreCase("share")) {
+                List<String> suggestions = new ArrayList<>();
+                if (args[2].equalsIgnoreCase("with")) {
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        if (p.getName().startsWith(args[3])) {
+                            suggestions.add(p.getName());
+                        }
                     }
                 }
             }
-        } else {
-            // No suggestions for other arguments
-            return null;
         }
         return null;
     }

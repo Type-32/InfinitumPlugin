@@ -84,7 +84,7 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
         TextComponent message = new TextComponent();
         player.sendMessage(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.list.header"));
         for(Faction faction : factions){
-            player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.YELLOW + LocalesManager.getPropFormatted("msg.command.factions.list.name",faction.getColor() + faction.getName()));
+            player.sendMessage(ChatColor.DARK_GRAY + "    - " + ChatColor.YELLOW + LocalesManager.getPropFormatted("msg.command.factions.list.name",faction.getColor() + faction.getName() + ChatColor.YELLOW));
             player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.owner",((faction.factionSettings.leadersPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + faction.getLeader().getPlayer().getName()))));
             player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.moderators",((faction.factionSettings.moderatorsPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + String.valueOf(faction.getModerators().size())))));
             player.sendMessage(ChatColor.DARK_GRAY + "        -> " + ChatColor.GRAY + LocalesManager.getPropFormatted("msg.command.factions.list.members",((faction.factionSettings.moderatorsPublic ? "" : ChatColor.MAGIC) + (ChatColor.BLUE + String.valueOf(faction.getMembers().size())))));
@@ -98,21 +98,21 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
             - Invite from <Faction Name> sent by <Sender Name>. [Join] [Deny]
          */
         TextComponent message = new TextComponent();
-        message.addExtra(ChatColor.GOLD + LocalesManager.Locales.getString("msg.command.factions.invite.header"));
+        message.addExtra(ChatColor.GOLD + LocalesManager.getProp("msg.command.factions.invite.header"));
 
         for(FactionInvite invite : factionInvite){
             TextComponent line = new TextComponent();
-            line.setText(ChatColor.GRAY + "    - " + String.format(LocalesManager.Locales.getString("msg.command.factions.invite.body_message"),invite.faction.getName(), invite.sender.getUsername()) + " ");
+            line.setText(ChatColor.GRAY + "    - " + LocalesManager.getPropFormatted("msg.command.factions.invite.body_message",invite.faction.getName(), invite.sender.getUsername()) + " ");
 
             TextComponent joinButton = new TextComponent();
             joinButton.setText(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invite.join"));
             joinButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/factions invites accept " + invite.faction.getName()));
-            joinButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GREEN + LocalesManager.Locales.getString("msg.command.factions.invite.join_hover"))));
+            joinButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GREEN + LocalesManager.getProp("msg.command.factions.invite.join_hover"))));
 
             TextComponent denyButton = new TextComponent();
             denyButton.setText(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invite.deny"));
             denyButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/factions invites deny " + invite.faction.getName()));
-            denyButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.RED + LocalesManager.Locales.getString("msg.command.factions.invite.deny_hover"))));
+            denyButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.RED + LocalesManager.getProp("msg.command.factions.invite.deny_hover"))));
 
             line.addExtra(joinButton);
             line.addExtra(ChatColor.GRAY + " ");
@@ -829,6 +829,8 @@ public class FactionsCommand implements CommandExecutor, TabCompleter {
                 }
                 return suggestions;
             }
+        } else if (args.length == 4) {
+
         } else {
             // No suggestions for other arguments
             return null;

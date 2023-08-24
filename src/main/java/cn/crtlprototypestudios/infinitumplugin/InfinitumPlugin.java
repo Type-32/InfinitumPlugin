@@ -43,7 +43,9 @@ public class InfinitumPlugin extends JavaPlugin {
         //getCommand("rules").setTabCompleter(rulesCommand);
 
         WaypointManager.readAllWaypoints(this);
-        FactionsManager.readFromFile();
+
+        FactionsManager.readFactionsFromFile();
+        FactionsManager.readKickQueueFromFile();
     }
 
     @Override

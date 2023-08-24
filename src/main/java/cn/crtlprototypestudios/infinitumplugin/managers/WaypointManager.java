@@ -20,7 +20,7 @@ import java.util.*;
 public class WaypointManager {
 
     private static HashMap<UUID, WaypointList> waypoints = new HashMap<>();
-    public static HashMap<UUID, HashMap<UUID, List<Waypoint>>> sharedWaypoints = new HashMap<>();
+    public static HashMap<UUID, HashMap<UUID, List<Waypoint>>> sharedWaypointInvites = new HashMap<>();
 
     public static List<UUID> getPlayers(){
         return new ArrayList<>(waypoints.keySet());
@@ -36,16 +36,16 @@ public class WaypointManager {
     public static void shareWaypoint(Player player, Player target, Waypoint waypoint){
         preventNull(player);
         preventNull(target);
-        if(!sharedWaypoints.containsKey(player.getUniqueId())){
-            sharedWaypoints.put(player.getUniqueId(), new HashMap<>());
+        if(!sharedWaypointInvites.containsKey(player.getUniqueId())){
+            sharedWaypointInvites.put(player.getUniqueId(), new HashMap<>());
         }
-        if(!sharedWaypoints.get(player.getUniqueId()).isEmpty()) {
+        if(!sharedWaypointInvites.get(player.getUniqueId()).isEmpty()) {
             List<Waypoint> temp = new ArrayList<>();
             temp.add(waypoint);
-            sharedWaypoints.get(player.getUniqueId()).put(target.getUniqueId(), temp);
+            sharedWaypointInvites.get(player.getUniqueId()).put(target.getUniqueId(), temp);
         }
-        if(sharedWaypoints.get(player.getUniqueId()).containsKey(target.getUniqueId())){
-            sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).add(waypoint);
+        if(sharedWaypointInvites.get(player.getUniqueId()).containsKey(target.getUniqueId())){
+            sharedWaypointInvites.get(player.getUniqueId()).get(target.getUniqueId()).add(waypoint);
         }
     }
 
@@ -63,19 +63,19 @@ public class WaypointManager {
     public static boolean shareWaypoint(Player player, Player target, String waypointName){
         preventNull(player);
         preventNull(target);
-        if(sharedWaypoints.get(player.getUniqueId()) == null){
-            sharedWaypoints.put(player.getUniqueId(), new HashMap<>());
+        if(sharedWaypointInvites.get(player.getUniqueId()) == null){
+            sharedWaypointInvites.put(player.getUniqueId(), new HashMap<>());
         }
-        if(sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()) == null){
+        if(sharedWaypointInvites.get(player.getUniqueId()).get(target.getUniqueId()) == null){
             List<Waypoint> temp = new ArrayList<>();
             temp.add(getWaypoint(player, waypointName));
-            sharedWaypoints.get(player.getUniqueId()).put(target.getUniqueId(), temp);
+            sharedWaypointInvites.get(player.getUniqueId()).put(target.getUniqueId(), temp);
         }
-        if(sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).contains(getWaypoint(player, waypointName))){
+        if(sharedWaypointInvites.get(player.getUniqueId()).get(target.getUniqueId()).contains(getWaypoint(player, waypointName))){
             return true;
         }
-        if(sharedWaypoints.get(player.getUniqueId()).containsKey(target.getUniqueId())){
-            sharedWaypoints.get(player.getUniqueId()).get(target.getUniqueId()).add(getWaypoint(player, waypointName));
+        if(sharedWaypointInvites.get(player.getUniqueId()).containsKey(target.getUniqueId())){
+            sharedWaypointInvites.get(player.getUniqueId()).get(target.getUniqueId()).add(getWaypoint(player, waypointName));
         }
         return false;
     }

@@ -30,6 +30,7 @@ public class FactionsManager {
 
     private static List<Faction> factions = new ArrayList<>();
     public static HashMap<UUID, List<FactionInvite>> factionInvites = new HashMap<>();
+    private static List<UUID> kickedQueueMessageList = new ArrayList<>();
 
     public static boolean findPlayerInFaction(Player player) {
         if(factions.isEmpty()) return false;
@@ -117,7 +118,7 @@ public class FactionsManager {
         }
         return null;
     }
-    public static void writeToFile() {
+    public static void writeFactionsToFile() {
         JSONArray factionsJsonArray = new JSONArray();
 
         for (Faction faction : factions) {
@@ -139,28 +140,82 @@ public class FactionsManager {
             e.printStackTrace();
         }
     }
+    public static void writeKickedQueueMessageListToFile(){
+        JSONArray kickedQueueArray = new JSONArray();
+        for (UUID uuid : kickedQueueMessageList) {
+            kickedQueueArray.add(uuid.toString());
+        }
+        File dir = new File(InfinitumPlugin.getInstance().getDataFolder(), "factions");
+        File jsonFile = new File(dir, "kicked_queue.json");
+        try(FileWriter writer = new FileWriter(jsonFile)){
+            writer.write(kickedQueueArray.toJSONString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public static void readFromFile() {
+    public static void readFactionsFromFile() {
         factions.clear(); // Clear the existing list of factions
 
         // Get the plugin's data folder
         File dataFolder = InfinitumPlugin.getInstance().getDataFolder();
 
-        // Read from the JSON file
-        File jsonFile = new File(dataFolder, "factions/factions.json");
-        if (jsonFile.exists()) {
-            try (FileReader reader = new FileReader(jsonFile)) {
-                JSONParser parser = new JSONParser();
-                JSONArray factionsJsonArray = (JSONArray) parser.parse(reader);
+        // Create a subdirectory if it doesn't exist
+        File subdirectory = new File(dataFolder, "factions");
+        subdirectory.mkdirs();
 
-                for (Object factionObject : factionsJsonArray) {
-                    JSONObject factionJson = (JSONObject) factionObject;
-                    Faction faction = new Faction(factionJson);
-                    factions.add(faction);
-                }
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
+        // Create the JSON file if it doesn't exist
+        File jsonFile = new File(subdirectory, "factions.json");
+        try {
+            jsonFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Read from the JSON file
+        try (FileReader reader = new FileReader(jsonFile)) {
+            JSONParser parser = new JSONParser();
+            JSONArray factionsJsonArray = (JSONArray) parser.parse(reader);
+
+            for (Object obj : factionsJsonArray) {
+                JSONObject factionJson = (JSONObject) obj;
+                Faction faction = new Faction(factionJson);
+                factions.add(faction);
             }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void readKickQueueFromFile() {
+        kickedQueueMessageList.clear(); // Clear the existing list of factions
+
+        // Get the plugin's data folder
+        File dataFolder = InfinitumPlugin.getInstance().getDataFolder();
+
+        // Create a subdirectory if it doesn't exist
+        File subdirectory = new File(dataFolder, "factions");
+        subdirectory.mkdirs();
+
+        // Create the JSON file if it doesn't exist
+        File jsonFile = new File(subdirectory, "kicked_queue.json");
+        try {
+            jsonFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Read from the JSON file
+        try (FileReader reader = new FileReader(jsonFile)) {
+            JSONParser parser = new JSONParser();
+            JSONArray factionsJsonArray = (JSONArray) parser.parse(reader);
+
+            for (Object obj : factionsJsonArray) {
+                JSONObject kickedJson = (JSONObject) obj;
+                UUID kickedQueueElement = UUID.fromString(kickedJson.toString());
+                kickedQueueMessageList.add(kickedQueueElement);
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
         }
     }
     public static List<Faction> getFactions() {
@@ -179,7 +234,7 @@ public class FactionsManager {
     public static void createFaction(Player player, String factionName) {
         Faction faction = new Faction(factionName, new FactionPlayerInfo(player, true), ChatColor.WHITE);
         factions.add(faction);
-        writeToFile();
+        writeFactionsToFile();
     }
 
     /**
@@ -210,7 +265,7 @@ public class FactionsManager {
         Faction faction = getFaction(factionName);
         if (faction != null) {
             faction.addMember(new FactionPlayerInfo(player));
-            writeToFile();
+            writeFactionsToFile();
         }
         throw new IllegalArgumentException("Faction does not exist");
     }
@@ -219,7 +274,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(player);
         if (faction != null) {
             faction.removeMember(player, true);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
 
@@ -227,7 +282,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(target);
         if (faction != null) {
             faction.removeMember(target, false);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
 
@@ -235,7 +290,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(target);
         if (faction != null) {
             faction.promoteMember(target);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
 
@@ -243,7 +298,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(target);
         if (faction != null) {
             faction.demoteMember(target);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
     public static boolean isSameFaction(Player player1, Player player2){
@@ -260,7 +315,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(player);
         if (faction != null) {
             faction.disband();
-            writeToFile();
+            writeFactionsToFile();
         }
     }
 
@@ -269,7 +324,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setPrefix(prefix);
             updatePlayerNicknames();
-            writeToFile();
+            writeFactionsToFile();
         }
 
     }
@@ -278,7 +333,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setSuffix(suffix);
             updatePlayerNicknames();
-            writeToFile();
+            writeFactionsToFile();
         }
     }
     public static void updatePlayerNicknames(){
@@ -295,7 +350,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setColor(ChatColor.valueOf(color));
             updatePlayerNicknames();
-            writeToFile();
+            writeFactionsToFile();
         }
     }
     public static void setFactionPrefixColor(Player player, String color){
@@ -303,7 +358,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setPrefixColor(ChatColor.valueOf(color));
             updatePlayerNicknames();
-            writeToFile();
+            writeFactionsToFile();
         }
     }
     public static void setFactionSuffixColor(Player player, String color){
@@ -311,7 +366,7 @@ public class FactionsManager {
         if (faction != null) {
             faction.setSuffixColor(ChatColor.valueOf(color));
             updatePlayerNicknames();
-            writeToFile();
+            writeFactionsToFile();
         }
     }
 
@@ -319,7 +374,7 @@ public class FactionsManager {
         Faction faction = getPlayerFaction(player);
         if (faction != null) {
             faction.factionSettings.setSettingsValue(rules,value);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
 
@@ -335,28 +390,28 @@ public class FactionsManager {
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.addAlliedFaction(faction);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
     public static void unallyFactions(Player player, Faction faction){
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.removeAlliedFaction(faction);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
     public static void enemyFactions(Player player, Faction faction){
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.addEnemyFaction(faction);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
     public static void unenemyFactions(Player player, Faction faction){
         Faction playerFaction = getPlayerFaction(player);
         if (playerFaction != null) {
             playerFaction.removeEnemyFaction(faction);
-            writeToFile();
+            writeFactionsToFile();
         }
     }
 }
