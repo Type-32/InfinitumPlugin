@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "type": "command",
+            "name": "run sh",
+            "program": "/bin/sh"
+        },
+        {
+            "type": "gradle",
+            "name": "Gradle Run",
+            "tasks": [
+                "run"
+            ],
+        }
+    ]
+}
